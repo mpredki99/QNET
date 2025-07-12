@@ -1,0 +1,13 @@
+[general]
+name=QNET
+qgisMinimumVersion=3.0
+supportsQt6=True
+
+description=Surveying control networks adjustment
+version=0.1.0
+author=Michał Prędki
+repository=https://github.com/mpredki99/QNET
+
+icon=icons/icon.png
+about=QNET is QGIS plugin that enables performing of least squares adjustment of surveying control network. With that tool it is possible to adjust network with robust method as well as to perform free adjustment. 
+tags=python, surveying, controls, network, adjustment, robust
