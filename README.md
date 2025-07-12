@@ -1,0 +1,1 @@
+QNET is QGIS plugin that enables performing of least squares adjustment of surveying control network. With that tool it is possible to adjust network with robust method as well as to perform free adjustment.
