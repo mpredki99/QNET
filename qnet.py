@@ -5,7 +5,7 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.core import *
 from qgis.gui import *
 
-from .ui import WindowDialog
+from .views import WindowDialog
 
 class QNet:
     def __init__(self, iface):
