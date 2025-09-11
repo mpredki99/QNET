@@ -4,8 +4,6 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
+from .weighting_methods import WEIGHTING_METHODS, get_default_tuning_constants
 
-def classFactory(iface):
-    from .qnet import QNet
-
-    return QNet(iface)
+__all__ = ["get_default_tuning_constants", "WEIGHTING_METHODS"]
