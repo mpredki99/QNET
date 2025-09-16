@@ -6,93 +6,82 @@
 
 from functools import partial
 from itertools import zip_longest
-from typing import List, Tuple
+from typing import Tuple
 
-from qgis.PyQt.QtWidgets import (
-    QAction,
-    QComboBox,
-    QDoubleSpinBox,
-    QFileDialog,
-    QLineEdit,
-)
+from qgis.PyQt.QtWidgets import QComboBox, QFileDialog, QLineEdit
 
 from ..infrastructure import WEIGHTING_METHODS, get_default_tuning_constants
+from .components.widgets import QDoubleSpinBoxList
 from .main_view_ui import MainViewUI
 
 
 class MainView(MainViewUI):
+    """
+    Main dialog logic for the QNET plugin.
+
+    Handles user interactions, file selection, weighting method configuration,
+    report and output options, and binds UI events to logic.
+    """
+
+    input_file_filter = "CSV Files (*.csv)"
+    report_file_filter = "Text Files (*.txt)"
+    output_file_filter = "Shapefile (*.shp)"
+
     def __init__(self, view_model=None) -> None:
         super().__init__()
 
         self.view_model = view_model
-        self.output_saving_mode = "temp_layer"
-        self._populate_output_menu()
+        self.output_saving_mode = "Temporary layer"
         self._bind_widgets()
 
     def set_input_file(self, line_edit: QLineEdit, window_title: str) -> None:
+        """Open file dialog and set selected file path to the line edit."""
         path, _ = QFileDialog.getOpenFileName(
-            self, window_title, "", "CSV Files (*.csv)"
+            self, window_title, "", self.input_file_filter
         )
         if path:
             line_edit.setText(path)
 
     def switch_free_adjustment(self, state: int) -> None:
+        """Enable or disable free adjustment weighting method controls."""
         is_enabled = state == 2
         self.free_adjustment_weighting_method_combo_box.setEnabled(is_enabled)
-        self.set_enabled_free_adjustment_weighting_method_tuning_constants(is_enabled)
-
-    def set_enabled_free_adjustment_weighting_method_tuning_constants(
-        self, is_enabled: bool
-    ) -> None:
-        for spin_box in self.free_adjustment_weighting_method_tuning_constants:
-            spin_box.setEnabled(is_enabled)
+        self.free_adjustment_weighting_method_tuning_constants.setEnabled(is_enabled)
 
     def weighting_method_changed(
-        self, combo_box: QComboBox, tuning_constants_list: List[QDoubleSpinBox]
+        self, combo_box: QComboBox, tuning_constants_list: QDoubleSpinBoxList
     ) -> None:
+        """Update tuning constant spin boxes when weighting method changes."""
         weighting_method = WEIGHTING_METHODS[combo_box.currentText()]
         tuning_constant_values = get_default_tuning_constants(weighting_method)
-        self.refresh_tuning_constant_spin_boxes(
+        self._refresh_tuning_constant_spin_boxes(
             tuning_constant_values, tuning_constants_list
         )
 
-    def refresh_tuning_constant_spin_boxes(
-        self,
-        tuning_constant_values: Tuple[float],
-        tuning_constants_list: List[QDoubleSpinBox],
-    ) -> None:
-        for spin_box, c in zip_longest(
-            tuning_constants_list, tuning_constant_values, fillvalue=None
-        ):
-            (spin_box.setValue(c), spin_box.show()) if c else spin_box.hide()
-
     def switch_report(self, state: int) -> None:
+        """Enable or disable report file controls."""
         is_enabled = state == 2
         self.report_button.setEnabled(is_enabled)
         self.report_line_edit.setEnabled(is_enabled)
 
     def set_report_path(self) -> None:
+        """Open file dialog to select report file path."""
         path, _ = QFileDialog.getSaveFileName(
-            self, "Save report", "", "Text Files (*.txt)"
+            self, "Save report", "", self.report_file_filter
         )
         if path:
             self.report_line_edit.setText(path)
 
-    def set_output_mode(self, mode: str) -> None:
-        if mode == "temp_layer" and self.output_saving_mode != "temp_layer":
-            self.output_saving_mode = mode
-            self.output_line_edit.setText("")
+    def set_output_mode(self, output_mode: str) -> None:
+        """Set the output saving mode and handle output path if needed."""
+        output_handlers = {
+            "Temporary layer": partial(self._handle_temporary_output, output_mode),
+            "To file": partial(self._handle_file_output, output_mode),
+        }
 
-        elif mode == "to_file":
-            self.output_saving_mode = mode
-            self.set_output_path()
-
-    def set_output_path(self) -> None:
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Select output file", "", "Shapefile (*.shp)"
-        )
-        if path:
-            self.output_line_edit.setText(path)
+        output_handler = output_handlers.get(output_mode)
+        if output_handler:
+            output_handler()
 
     def perform_adjustment(self) -> None:
         # TODO: Pass the adjustment parameters to the view model command
@@ -119,12 +108,12 @@ class MainView(MainViewUI):
                 "Free adjustment:",
                 self.free_adjustment_weighting_method_combo_box.currentText(),
             )
-        for i, obs_c in enumerate(
-            self.free_adjustment_weighting_method_tuning_constants
-        ):
-            if obs_c.isHidden():
-                break
-            print(f"c_{i+1}:", obs_c.value())
+            for i, obs_c in enumerate(
+                self.free_adjustment_weighting_method_tuning_constants
+            ):
+                if obs_c.isHidden():
+                    break
+                print(f"c_{i+1}:", obs_c.value())
         print()
 
         if self.report_line_edit.isEnabled():
@@ -139,35 +128,48 @@ class MainView(MainViewUI):
         else:
             print("Output file path:", self.output_line_edit.text())
 
-    # ====================================================
-    def _populate_output_menu(self):
-        qmenu_actions = self._define_output_mode_actions()
-        for action in qmenu_actions:
-            self.output_saving_mode_menu.addAction(action)
+    def _refresh_tuning_constant_spin_boxes(
+        self,
+        tuning_constant_values: Tuple[float],
+        tuning_constants_list: QDoubleSpinBoxList,
+    ) -> None:
+        """Update and show/hide tuning constant spin boxes based on method."""
+        for spin_box, c in zip_longest(
+            tuning_constants_list, tuning_constant_values, fillvalue=None
+        ):
+            (spin_box.setValue(c), spin_box.show()) if c else spin_box.hide()
 
-    def _define_output_mode_actions(self):
-        temp_layer_mode_action = self._define_output_mode_action(
-            "temp_layer", "Temporary layer"
+    def _handle_temporary_output(self, output_mode: str):
+        """Handle output mode when 'Temporary layer' is selected."""
+        if self.output_saving_mode != "Temporary layer":
+            self.output_saving_mode = output_mode
+            self.output_line_edit.setText("")
+
+    def _handle_file_output(self, output_mode: str):
+        """Handle output mode when 'To file' is selected."""
+        self.output_saving_mode = output_mode
+        self._set_output_path()
+
+    def _set_output_path(self) -> None:
+        """Open file dialog to select output file path."""
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Select output file", "", self.output_file_filter
         )
-        to_file_mode_action = self._define_output_mode_action("to_file", "To file")
-
-        return temp_layer_mode_action, to_file_mode_action
-
-    def _define_output_mode_action(self, action_mode: str, action_name: str):
-        action = QAction(action_name, self)
-        action.triggered.connect(lambda: self.set_output_mode(action_mode))
-
-        return action
+        if path:
+            self.output_line_edit.setText(path)
 
     def _bind_widgets(self):
+        """Bind all widget signals to their respective handlers."""
         self._bind_input_file_buttons()
         self._bind_weighting_method_combo_boxes()
         self.free_adjustment_checkbox.stateChanged.connect(self.switch_free_adjustment)
         self.report_checkbox.stateChanged.connect(self.switch_report)
         self.report_button.clicked.connect(self.set_report_path)
+        self._bind_output_saving_mode_menu()
         self.ok_button.clicked.connect(self.perform_adjustment)
 
     def _bind_input_file_buttons(self) -> None:
+        """Bind input file buttons to open file dialogs."""
         buttons = (self.measurements_button, self.controls_button)
         line_edits = (self.measurements_line_edit, self.controls_line_edit)
         labels = (self.measurements_label, self.controls_label)
@@ -179,6 +181,7 @@ class MainView(MainViewUI):
             )
 
     def _bind_weighting_method_combo_boxes(self):
+        """Bind weighting method combo boxes to update tuning constants."""
         combo_boxes = (
             self.observation_weighting_method_combo_box,
             self.free_adjustment_weighting_method_combo_box,
@@ -192,3 +195,8 @@ class MainView(MainViewUI):
             combo_box.currentIndexChanged.connect(
                 partial(self.weighting_method_changed, combo_box, tuning_constants_list)
             )
+
+    def _bind_output_saving_mode_menu(self):
+        """Bind output saving mode menu actions to set output mode."""
+        for action in self.output_saving_mode_menu.actions():
+            action.triggered.connect(partial(self.set_output_mode, action.text()))
