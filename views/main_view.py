@@ -10,6 +10,12 @@ from typing import Tuple
 
 from qgis.PyQt.QtWidgets import QComboBox, QFileDialog, QLineEdit
 
+from ..dto.data_transfer_objects import (
+    AdjustmentParams,
+    OutputParams,
+    ReaderParams,
+    ReportParams,
+)
 from ..infrastructure import WEIGHTING_METHODS, get_default_tuning_constants
 from .components.widgets import QDoubleSpinBoxList
 from .main_view_ui import MainViewUI
@@ -84,49 +90,15 @@ class MainView(MainViewUI):
             output_handler()
 
     def perform_adjustment(self) -> None:
-        # TODO: Pass the adjustment parameters to the view model command
-        print("----- PERFORM ADJUSTMENT -----")
-        print()
+        """Perform the adjustment using parameters from the UI."""
+        reader_params = self._get_reader_params()
+        adjustment_params = self._get_adjustment_params()
+        report_params = self._get_report_params()
+        output_params = self._get_output_params()
 
-        print("----- Input files -----")
-        print("measurements.csv:", self.measurements_line_edit.text())
-        print("controls.csv", self.controls_line_edit.text())
-        print()
-
-        print("----- Weighting methods -----")
-        print(
-            "Observations:", self.observation_weighting_method_combo_box.currentText()
+        self.view_model.perform_adjustment(
+            reader_params, adjustment_params, report_params, output_params
         )
-        for i, obs_c in enumerate(self.observation_weighting_method_tuning_constants):
-            if obs_c.isHidden():
-                break
-            print(f"c_{i+1}:", obs_c.value())
-        print()
-
-        if self.free_adjustment_weighting_method_combo_box.isEnabled():
-            print(
-                "Free adjustment:",
-                self.free_adjustment_weighting_method_combo_box.currentText(),
-            )
-            for i, obs_c in enumerate(
-                self.free_adjustment_weighting_method_tuning_constants
-            ):
-                if obs_c.isHidden():
-                    break
-                print(f"c_{i+1}:", obs_c.value())
-        print()
-
-        if self.report_line_edit.isEnabled():
-            print("----- Export report -----")
-            print("Report path:", self.report_line_edit.text())
-        print()
-
-        print("----- Output -----")
-        print("Output_mode:", self.output_saving_mode)
-        if self.output_saving_mode == "temp_layer":
-            print("Temp layer name", self.output_line_edit.text())
-        else:
-            print("Output file path:", self.output_line_edit.text())
 
     def _refresh_tuning_constant_spin_boxes(
         self,
@@ -200,3 +172,62 @@ class MainView(MainViewUI):
         """Bind output saving mode menu actions to set output mode."""
         for action in self.output_saving_mode_menu.actions():
             action.triggered.connect(partial(self.set_output_mode, action.text()))
+
+    def _get_reader_params(self):
+        """Get reader parameters from the UI."""
+        return ReaderParams(
+            measurements_file_path=self.measurements_line_edit.text(),
+            controls_file_path=self.controls_line_edit.text(),
+        )
+
+    def _get_adjustment_params(self):
+        """Get adjustment parameters from the UI."""
+        obs_adj = self.observation_weighting_method_combo_box.currentText()
+        free_adjustment = (
+            self.free_adjustment_weighting_method_combo_box.currentText()
+            if self.free_adjustment_weighting_method_combo_box.isEnabled()
+            else None
+        )
+        return AdjustmentParams(
+            obs_adj=obs_adj,
+            obs_tuning_constants=self._get_tuning_constants_from_user(
+                obs_adj, self.observation_weighting_method_tuning_constants
+            ),
+            free_adjustment=free_adjustment,
+            free_adj_tuning_constants=self._get_tuning_constants_from_user(
+                free_adjustment, self.free_adjustment_weighting_method_tuning_constants
+            ),
+        )
+
+    def _get_report_params(self):
+        """Get report parameters from the UI."""
+        return ReportParams(
+            report_path=(
+                self.report_line_edit.text()
+                if self.report_line_edit.isEnabled()
+                else None
+            ),
+        )
+
+    def _get_output_params(self):
+        """Get output parameters from the UI."""
+        return OutputParams(
+            output_saving_mode=self.output_saving_mode,
+            output_path=(
+                self.output_line_edit.text() if self.output_line_edit.text() else None
+            ),
+        )
+        
+    def _get_tuning_constants_from_user(
+        self, method: str, tuning_constants_list: QDoubleSpinBoxList
+    ) -> dict:
+        """Get tuning constants from user input."""
+        if not method:
+            return
+
+        tuning_constants = get_default_tuning_constants(WEIGHTING_METHODS[method])
+        for key, spin_box in zip(tuning_constants.keys(), tuning_constants_list):
+            if spin_box.isHidden():
+                break
+            tuning_constants[key] = spin_box.value()
+        return tuning_constants

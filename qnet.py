@@ -11,6 +11,7 @@ from qgis.gui import *
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
+from .view_models import MainViewModel
 from .views import MainView
 
 
@@ -32,5 +33,7 @@ class QNet:
         self.iface.removeToolBarIcon(self.action)
 
     def run(self):
-        dialog = MainView()
-        dialog.exec_()
+        model = None
+        view_model = MainViewModel(model)
+        view = MainView(view_model)
+        view.exec_()
