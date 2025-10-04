@@ -53,9 +53,9 @@ class MainView(MainViewUI):
     ) -> None:
         """Update tuning constant spin boxes when weighting method changes."""
         weighting_method = WEIGHTING_METHODS[combo_box.currentText()]
-        tuning_constant_values = get_default_tuning_constants(weighting_method)
+        tuning_constants = get_default_tuning_constants(weighting_method)
         self._refresh_tuning_constant_spin_boxes(
-            tuning_constant_values, tuning_constants_list
+            tuning_constants.values(), tuning_constants_list
         )
 
     def switch_report(self, state: int) -> None:
@@ -130,12 +130,12 @@ class MainView(MainViewUI):
 
     def _refresh_tuning_constant_spin_boxes(
         self,
-        tuning_constant_values: Tuple[float],
+        tuning_constants_values: Tuple[float],
         tuning_constants_list: QDoubleSpinBoxList,
     ) -> None:
         """Update and show/hide tuning constant spin boxes based on method."""
         for spin_box, c in zip_longest(
-            tuning_constants_list, tuning_constant_values, fillvalue=None
+            tuning_constants_list, tuning_constants_values, fillvalue=None
         ):
             (spin_box.setValue(c), spin_box.show()) if c else spin_box.hide()
 
