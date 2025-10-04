@@ -1,0 +1,222 @@
+# Coding: UTF-8
+
+# Copyright (C) 2025 Michał Prędki
+# Licensed under the GNU General Public License v3.0.
+# Full text of the license can be found in the LICENSE and COPYING files in the repository.
+
+from __future__ import annotations
+
+from functools import cached_property
+from warnings import warn
+
+import numpy as np
+from numpy.linalg import pinv
+from pysurv.utils.utils import reset_object_cache
+from pysurv.warnings import SVDNotConvergeWarning
+
+from ._constants import INVALID_INDEX
+from .adjustment_iteration import AdjustmentIteration
+from .adjustment_matrices import AdjustmentMatrices
+
+
+class DenseIteration(AdjustmentIteration):
+    """Class that implements LSQ adjustment iteration on numpy dense format stored matrices."""
+
+    def __init__(self, matrices: AdjustmentMatrices) -> None:
+        super().__init__(matrices)
+
+        coordinate_indices = self._lsq_matrices.indexer.coordinate_indices.values
+        self._coord_mask = self._get_coord_mask(coordinate_indices)
+        self._coord_idx = self._get_coord_idx(coordinate_indices)
+
+        self._matrix_g = None
+        self._inv_matrix_G = None
+        self._cross_product = None
+        self._increments = None
+
+    @property
+    def matrix_G(self):
+        """Return matrix G."""
+        return self._matrix_g
+
+    @property
+    def inv_matrix_G(self):
+        """Return inverse of G matrix."""
+        return self._inv_matrix_G
+
+    @property
+    def cross_product(self):
+        """Rerurn cross product"""
+        return self._cross_product
+
+    @property
+    def increments(self):
+        """Return increments."""
+        return self._increments
+
+    @cached_property
+    def coord_increments(self):
+        """Return fitered for just coordinate increments."""
+        if self._increments is None:
+            return
+        return self.increments[self._coord_idx]
+
+    @cached_property
+    def increment_matrix(self):
+        """Return increment matrix."""
+        if self._increments is None:
+            return
+        return self._get_increment_matrix()
+
+    @cached_property
+    def obs_residuals(self):
+        """Return observation residuals."""
+        if self._increments is None:
+            return
+        X = self._lsq_matrices.matrix_X
+        Y = self._lsq_matrices.matrix_Y
+        return X @ self.increments - Y
+
+    @cached_property
+    def residual_variance(self):
+        """Return residual variance."""
+        if self.obs_residuals is None:
+            return
+        return self._get_residual_variance()
+
+    @cached_property
+    def covariance_X(self):
+        """Return the covariance matrix of X."""
+        if self.residual_variance is None:
+            return
+        return self.residual_variance * self.inv_matrix_G
+
+    @cached_property
+    def covariance_Y(self):
+        """Return the covariance matrix of Y."""
+        if self.covariance_X is None:
+            return
+        X = self._lsq_matrices.matrix_X
+        return X @ self.covariance_X @ X.T
+
+    @cached_property
+    def covariance_r(self):
+        """Return the covariance matrix of residuals."""
+        if self.covariance_Y is None:
+            return
+        return self._get_cov_r()
+
+    @cached_property
+    def coordinate_weights(self):
+        """Return the point weights."""
+        return self._get_coord_weights()
+
+    def run(self):
+        """Run a single iteration step."""
+        try:
+            matrix_g = self._get_matrix_g()
+            inv_matrix_G = pinv(matrix_g)
+            cross_product = self._get_cross_product()
+            increments = inv_matrix_G @ cross_product
+
+            reset_object_cache(self)
+
+            self._increase_current()
+            self._matrix_g = matrix_g
+            self._inv_matrix_G = inv_matrix_G
+            self._cross_product = cross_product
+            self._increments = increments
+
+            return True
+
+        except np.linalg.LinAlgError:
+            warn(
+                f"Calculations aborted due to SVD did not converge in {self._current + 1}. iteration.",
+                SVDNotConvergeWarning,
+            )
+            return False
+
+    def _get_coord_mask(self, coord_indices):
+        """Return a boolean mask for valid coordinate indices."""
+        return coord_indices != INVALID_INDEX
+
+    def _get_coord_idx(self, coord_indices):
+        """Return the indices of valid coordinates."""
+        return coord_indices[self._coord_mask]
+
+    def _get_matrix_g(self):
+        """Calculate the gram matrix."""
+        X = self._lsq_matrices.matrix_X
+        W = self._lsq_matrices.matrix_W
+        R = self._lsq_matrices.matrix_R
+        sX = self._lsq_matrices.matrix_sX
+        sW = self._lsq_matrices.matrix_sW
+
+        if W is not None:
+            G1 = X.T @ W @ X
+        else:
+            G1 = X.T @ X
+
+        if sX is not None and sW is not None:
+            G2 = sX.T @ sW @ sX
+        elif R is not None and sW is not None:
+            G2 = R.T @ R @ sW
+        else:
+            G2 = None
+
+        return G1 + G2 if G2 is not None else G1
+
+    def _get_cross_product(self):
+        """Calculate the cross product."""
+        X = self._lsq_matrices.matrix_X
+        Y = self._lsq_matrices.matrix_Y
+        W = self._lsq_matrices.matrix_W
+
+        if W is not None:
+            return X.T @ W @ Y
+        else:
+            return X.T @ Y
+
+    def _get_increment_matrix(self):
+        """Calculate increment matrix."""
+        increments_matrix = np.zeros(self._coord_mask.shape)
+        increments_matrix[self._coord_mask] += self.coord_increments.flatten()
+        return increments_matrix
+
+    def _get_residual_variance(self):
+        """Get value of residual variance."""
+        if self._lsq_matrices.degrees_of_freedom > 0:
+            return self._calculate_residual_variance()
+        return 1
+
+    def _calculate_residual_variance(self):
+        """Calculate the residual variance value."""
+        W = self._lsq_matrices.matrix_W
+        k = self._lsq_matrices.degrees_of_freedom
+        residuals = self.obs_residuals.reshape(-1)
+
+        if W is not None:
+            squared_residuals = (residuals**2 * W.diagonal()).sum()
+        else:
+            squared_residuals = (residuals**2).sum()
+
+        return np.divide(squared_residuals, k)
+
+    def _get_cov_r(self):
+        """Calculate covariance matrix of residuals."""
+        n = self.covariance_Y.shape[0]
+        W = self._lsq_matrices.matrix_W
+
+        diag_idx = np.diag_indices(n)
+        weight_coffactor_matrix = pinv(W) if W is not None else np.eye(n)
+        weight_coffactor_matrix[diag_idx] *= self.residual_variance
+
+        return weight_coffactor_matrix - self.covariance_Y
+
+    def _get_coord_weights(self):
+        """Calculate the point weights from sW matrix."""
+        sW = self._lsq_matrices.matrix_sW
+        if sW is None:
+            return None
+
+        return sW.diagonal()[self._coord_idx]
