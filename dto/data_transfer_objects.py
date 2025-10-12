@@ -9,33 +9,35 @@ from typing import Optional
 
 
 @dataclass
-class ReaderParams:
+class InputFilesParams:
     """Gather parameters for reading input files."""
 
-    measurements_file_path: str
-    controls_file_path: str
+    measurements_file_path: str = ""
+    controls_file_path: str = ""
 
 
 @dataclass
 class AdjustmentParams:
     """Gather parameters for adjustment computation."""
 
-    obs_adj: str = "weighted"
-    obs_tuning_constants: Optional[dict] = None
-    free_adjustment: Optional[str] = None
-    free_adj_tuning_constants: Optional[dict] = None
+    observation_weighting_method: str = "weighted"
+    observation_tuning_constants: Optional[dict] = None
+    perform_free_adjustment: bool = False
+    free_adjustment_weighting_method: str = "weighted"
+    free_adjustment_tuning_constants: Optional[dict] = None
 
 
 @dataclass
 class ReportParams:
     """Gather parameters for report output."""
 
-    report_path: Optional[str] = None
+    export_report: bool = False
+    report_path: str = ""
 
 
 @dataclass
 class OutputParams:
     """Gather parameters for output saving."""
 
-    output_saving_mode: str
-    output_path: Optional[str] = None
+    output_saving_mode: str = "Temporary layer"
+    output_path: str = ""

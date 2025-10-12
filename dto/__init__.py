@@ -11,9 +11,9 @@ and configuration between layers of the application.
 
 from .data_transfer_objects import (
     AdjustmentParams,
+    InputFilesParams,
     OutputParams,
-    ReaderParams,
     ReportParams,
 )
 
-__all__ = ["ReaderParams", "AdjustmentParams", "ReportParams", "OutputParams"]
+__all__ = ["InputFilesParams", "AdjustmentParams", "ReportParams", "OutputParams"]

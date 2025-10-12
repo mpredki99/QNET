@@ -5,44 +5,56 @@
 # Full text of the license can be found in the LICENSE file in the repository.
 
 from inspect import signature, unwrap
-from typing import Dict
+from typing import Dict, Tuple
 
 from pysurv.adjustment import robust
 
 WEIGHTING_METHODS = {
-    "Ordinary": None,
-    "Weighted": None,
-    "Huber": robust.huber,
-    "Slope": robust.slope,
-    "Hampel": robust.hampel,
-    "Danish": robust.danish,
-    "Epanechnikov": robust.epanechnikov,
-    "Tukey": robust.tukey,
-    "Jacobi": robust.jacobi,
-    "Exponential": robust.exponential,
-    "Choice Rule of Alternative": robust.cra,
-    "Error Function": robust.error_func,
-    "Cauchy": robust.cauchy,
-    "T distribution": robust.t,
-    "Bell Curve": robust.chain_bell,
-    "Chain Curve": robust.chain,
-    "Andrews": robust.andrews,
-    "Wave": robust.wave,
-    "Half-wave": robust.half_wave,
-    "Wigner": robust.wigner,
-    "Ellipse Curve": robust.ellipse_curve,
-    "Trim": robust.trim,
+    "Ordinary": "ordinary",
+    "Weighted": "weighted",
+    "Huber": "huber",
+    "Slope": "slope",
+    "Hampel": "hampel",
+    "Danish": "danish",
+    "Epanechnikov": "epanechnikov",
+    "Tukey": "tukey",
+    "Jacobi": "jacobi",
+    "Exponential": "exponential",
+    "Choice Rule of Alternative": "cra",
+    "Error Function": "error_func",
+    "Cauchy": "cauchy",
+    "T distribution": "t",
+    "Bell Curve": "chain_bell",
+    "Chain Curve": "chain",
+    "Andrews": "andrews",
+    "Wave": "wave",
+    "Half-wave": "half_wave",
+    "Wigner": "wigner",
+    "Ellipse Curve": "ellipse_curve",
+    "Trim": "trim",
 }
 
 
-def get_default_tuning_constants(func) -> Dict[str, float]:
+def get_method_label_from_name(method_name: str) -> str:
+    for label, name in WEIGHTING_METHODS.items():
+        if name == method_name:
+            return label
+    return ""
+
+
+def get_method_name_and_tuning_constants(
+    method_label: str,
+) -> Tuple[str, Dict[str, float]]:
+    method_name = WEIGHTING_METHODS.get(method_label)
+    func = getattr(robust, method_name, None)
+
     if not func:
-        return dict()
+        return method_name, dict()
 
     wrapped_func = unwrap(func)
     sig = signature(wrapped_func)
 
-    return {
+    return method_name, {
         key: value.default
         for key, value in sig.parameters.items()
         if isinstance(value.default, (int, float))
