@@ -6,6 +6,8 @@
 
 from typing import Optional
 
+from qgis.PyQt.QtCore import Qt
+
 from ..view_models.report_view_model import ReportViewModel
 from .base_view import BaseView
 from .components.utils import (
@@ -16,7 +18,7 @@ from .components.utils import (
 from .report_view_ui import ReportViewUI
 
 
-class ReportView(ReportViewUI, BaseView):
+class ReportView(ReportViewUI, BaseView[ReportViewModel]):
     """
     View class for the report section in the QNET plugin.
 
@@ -31,21 +33,6 @@ class ReportView(ReportViewUI, BaseView):
         super().__init__()
         self.view_model = view_model
 
-    @property
-    def view_model(self) -> Optional[ReportViewModel]:
-        """Get the current view model."""
-        return self._view_model
-
-    @view_model.setter
-    def view_model(self, view_model: Optional[ReportViewModel]) -> None:
-        """Set the view model and bind widgets and signals if its not None."""
-        self._view_model = view_model
-        if not self._view_model:
-            return
-        self.bind_widgets()
-        self.bind_view_model_signals()
-        self._view_model.reset_state()
-
     def bind_widgets(self) -> None:
         """Bind UI widgets to their handlers."""
         self.report_button.clicked.connect(self._set_report_path)
@@ -59,7 +46,7 @@ class ReportView(ReportViewUI, BaseView):
 
     def enable_report(self, enabled: bool) -> None:
         """Enable or disable report control widgets."""
-        update_checkbox_state(self.report_checkbox, 2 if enabled else 0)
+        update_checkbox_state(self.report_checkbox, Qt.Checked if enabled else Qt.Unchecked)
         self.report_button.setEnabled(enabled)
         self.report_line_edit.setEnabled(enabled)
 

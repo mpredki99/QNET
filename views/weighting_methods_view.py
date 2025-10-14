@@ -15,7 +15,7 @@ from .components.widgets import QDoubleSpinBoxList, WeightingMethodComboBox
 from .weighting_methods_view_ui import WeightingMethodsViewUI
 
 
-class WeightingMethodsView(WeightingMethodsViewUI, BaseView):
+class WeightingMethodsView(WeightingMethodsViewUI, BaseView[WeightingMethodsViewModel]):
     """
     View class for the weighting methods section in the QNET plugin.
 
@@ -30,21 +30,6 @@ class WeightingMethodsView(WeightingMethodsViewUI, BaseView):
         super().__init__()
         self.view_model = view_model
 
-    @property
-    def view_model(self) -> Optional[WeightingMethodsViewModel]:
-        """Get the current view model."""
-        return self._view_model
-
-    @view_model.setter
-    def view_model(self, view_model: Optional[WeightingMethodsViewModel]) -> None:
-        """Set the view model and bind widgets and signals if its not None."""
-        self._view_model = view_model
-        if not self._view_model:
-            return
-        self.bind_widgets()
-        self.bind_view_model_signals()
-        self._view_model.reset_state()
-
     def bind_widgets(self) -> None:
         """Bind UI widgets to their handlers."""
         self.observation_weighting_method_combo_box.currentIndexChanged[str].connect(
@@ -56,9 +41,9 @@ class WeightingMethodsView(WeightingMethodsViewUI, BaseView):
         self.free_adjustment_checkbox.stateChanged.connect(
             self.view_model.switch_free_adjustment
         )
-        self.free_adjustment_weighting_method_combo_box.currentIndexChanged[
-            str
-        ].connect(self.view_model.update_free_adjustment_weighting_method)
+        self.free_adjustment_weighting_method_combo_box.currentIndexChanged[str].connect(
+            self.view_model.update_free_adjustment_weighting_method
+        )
         self.free_adjustment_weighting_method_tuning_constants.listValueChanged.connect(
             self.view_model.update_free_adjustment_tuning_constants
         )

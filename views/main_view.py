@@ -23,10 +23,11 @@ class MainView(MainViewUI):
 
         self.main_view_model = main_view_model
 
+        if not self.main_view_model:
+            return 
+
         self.input_file_view.view_model = self.main_view_model.input_files_view_model
-        self.weighting_methods_view.view_model = (
-            self.main_view_model.weighting_methods_view_model
-        )
+        self.weighting_methods_view.view_model = self.main_view_model.weighting_methods_view_model
         self.report_view.view_model = self.main_view_model.report_view_model
         self.output_view.view_model = self.main_view_model.output_view_model
 

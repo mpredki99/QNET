@@ -13,7 +13,7 @@ from .components.utils import get_file_path_from_dialog_window, update_line_edit
 from .output_view_ui import OutputViewUI
 
 
-class OutputView(OutputViewUI, BaseView):
+class OutputView(OutputViewUI, BaseView[OutputViewModel]):
     """
     Output section logic and UI for the QNET plugin.
 
@@ -27,21 +27,6 @@ class OutputView(OutputViewUI, BaseView):
     def __init__(self, view_model: Optional[OutputViewModel] = None) -> None:
         super().__init__()
         self.view_model = view_model
-
-    @property
-    def view_model(self) -> Optional[OutputViewModel]:
-        """Get the current view model."""
-        return self._view_model
-
-    @view_model.setter
-    def view_model(self, view_model: Optional[OutputViewModel]) -> None:
-        """Set the view model and bind widgets and signals if its not None."""
-        self._view_model = view_model
-        if not self._view_model:
-            return
-        self.bind_widgets()
-        self.bind_view_model_signals()
-        self._view_model.reset_state()
 
     def bind_widgets(self) -> None:
         """Bind UI widgets to their handlers."""

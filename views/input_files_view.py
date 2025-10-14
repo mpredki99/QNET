@@ -12,7 +12,7 @@ from .components.utils import get_file_path_from_dialog_window, update_line_edit
 from .input_files_view_ui import InputFilesViewUI
 
 
-class InputFilesView(InputFilesViewUI, BaseView):
+class InputFilesView(InputFilesViewUI, BaseView[InputFilesViewModel]):
     """
     View class for the input files section in the QNET plugin.
 
@@ -27,21 +27,6 @@ class InputFilesView(InputFilesViewUI, BaseView):
     def __init__(self, view_model: Optional[InputFilesViewModel] = None) -> None:
         super().__init__()
         self.view_model = view_model
-
-    @property
-    def view_model(self) -> Optional[InputFilesViewModel]:
-        """Get the current view model."""
-        return self._view_model
-
-    @view_model.setter
-    def view_model(self, view_model: Optional[InputFilesViewModel]) -> None:
-        """Set the view model and bind widgets and signals if its not None."""
-        self._view_model = view_model
-        if not self._view_model:
-            return
-        self.bind_widgets()
-        self.bind_view_model_signals()
-        self._view_model.reset_state()
 
     def bind_widgets(self) -> None:
         """Bind UI widgets to their handlers."""
