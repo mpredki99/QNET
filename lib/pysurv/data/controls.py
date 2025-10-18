@@ -40,7 +40,7 @@ class Controls(gpd.GeoDataFrame):
         geometry_name: str = "geometry",
         **kwargs,
     ) -> None:
-
+        
         _first_init = kwargs.pop("_first_init", True)
         super().__init__(data, **kwargs)
 
@@ -61,9 +61,7 @@ class Controls(gpd.GeoDataFrame):
 
     @classmethod
     def _geodataframe_constructor_with_fallback(cls, *args, **kwargs):
-        # if issubclass(cls, Controls):
         return Controls(*args, **kwargs, _first_init=False)
-        # return super()._geodataframe_constructor_with_fallback(cls, *args, **kwargs)
 
     def __contains__(self, name: Any) -> bool:
         """Add check if a column or the virtual geometry exists in the Controls dataset."""
@@ -72,8 +70,12 @@ class Controls(gpd.GeoDataFrame):
         return super().__contains__(name)
 
     def __getattr__(self, name: str):
+        if name == "active_geometry_name":
+            return self._geometry_column_name
+        
         if name == self.active_geometry_name and name != "geometry":
             return self.geometry
+        
         return super().__getattr__(name)
 
     def __getitem__(self, name: str | list) -> pd.Series | pd.DataFrame:
@@ -84,11 +86,15 @@ class Controls(gpd.GeoDataFrame):
         if isinstance(name, (list, pd.Index)) and self.active_geometry_name in name:
             name = list(name)
             name.remove(self.active_geometry_name)
+            
             subset = super().__getitem__(name)
             subset = subset.join(self.geometry)
+            
+            return self._constructor(
+            subset, crs=self.crs, geometry_name=self.active_geometry_name
+            )
 
         subset = super().__getitem__(name)
-
         if len(subset.shape) == 1:
             return subset
 
