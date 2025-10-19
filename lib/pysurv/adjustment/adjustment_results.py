@@ -203,7 +203,7 @@ class AdjustmentResults(ABC):
             data=self._solver.obs_residuals.flatten(),
             index=self._observation_index,
             name="obs_residuals",
-        ).unstack("column", sort=False)
+        ).unstack("column")
         df.columns = [f"v{col}" for col in df.columns]
         return df
 
@@ -290,7 +290,7 @@ class AdjustmentResults(ABC):
             self._solver.normalized_residuals,
             index=self._observation_index,
             name="normalized_obs_residuals",
-        ).unstack("column", sort=False)
+        ).unstack("column")
         df.columns = [f"v_norm {col}" for col in df.columns]
         return df
 
@@ -299,7 +299,7 @@ class AdjustmentResults(ABC):
         df = pd.Series(
             self._solver.normalized_corrections,
             index=self._matrix_coordinate_index,
-        ).unstack("column", sort=False)
+        ).unstack("column")
         df.columns = [f"v_norm {col}" for col in df.columns]
         return df
 

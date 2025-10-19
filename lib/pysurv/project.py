@@ -28,6 +28,10 @@ class Project(ProjectFactory):
         self._adjustment = None
 
     @property
+    def dataset(self):
+        return self._dataset
+
+    @property
     def adjustment(self):
         """Return the adjustment object."""
         return self._adjustment
@@ -60,4 +64,5 @@ class Project(ProjectFactory):
         self.adjustment.solver.create_list_of_variances = create_list_of_variances
 
         self._adjustment.solver.solve()
+
         return self._adjustment.report

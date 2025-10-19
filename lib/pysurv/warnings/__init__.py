@@ -5,6 +5,7 @@
 # Full text of the license can be found in the LICENSE and COPYING files in the repository.
 
 from ._warnings import (
+    PySurvWarning,
     DefaultIndexWarning,
     GeometryAssigningWarning,
     InvalidDataWarning,
@@ -14,6 +15,7 @@ from ._warnings import (
 )
 
 __all__ = [
+    "PySurvWarning",
     "DefaultIndexWarning",
     "GeometryAssigningWarning",
     "InvalidDataWarning",

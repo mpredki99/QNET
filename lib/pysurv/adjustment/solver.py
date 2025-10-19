@@ -69,7 +69,7 @@ class Solver(AdjustmentSolver):
     @cached_property
     def coord_corrections(self) -> np.ndarray:
         """Return value of coordinate corrections."""
-        return (self._controls.coordinates - self._approx_coordinates).values
+        return self._controls.coordinates.values - self._approx_coordinates.values
 
     @cached_property
     def normalized_residuals(self) -> np.ndarray:
@@ -252,9 +252,6 @@ class Solver(AdjustmentSolver):
     def _get_adjustment_iteration(self) -> DenseIteration:
         """Returns iteration object."""
         return DenseIteration(self._matrices)
-
-    # def _get_adjustment_results(self) -> Results:
-    #     return Results(self)
 
     def _get_n_coord_corrections(self) -> int | None:
         if self.coord_corrections is None:

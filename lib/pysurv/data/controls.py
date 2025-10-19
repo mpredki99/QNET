@@ -40,7 +40,7 @@ class Controls(gpd.GeoDataFrame):
         geometry_name: str = "geometry",
         **kwargs,
     ) -> None:
-        
+
         _first_init = kwargs.pop("_first_init", True)
         super().__init__(data, **kwargs)
 
@@ -59,6 +59,13 @@ class Controls(gpd.GeoDataFrame):
             raise ValueError("Name is not valid identifier.")
         return name
 
+    @property
+    def _constructor(self):
+        def wrapper(*args, **kwargs):
+            return self._geodataframe_constructor_with_fallback(*args, **kwargs)
+
+        return wrapper
+
     @classmethod
     def _geodataframe_constructor_with_fallback(cls, *args, **kwargs):
         return Controls(*args, **kwargs, _first_init=False)
@@ -72,10 +79,10 @@ class Controls(gpd.GeoDataFrame):
     def __getattr__(self, name: str):
         if name == "active_geometry_name":
             return self._geometry_column_name
-        
+
         if name == self.active_geometry_name and name != "geometry":
             return self.geometry
-        
+
         return super().__getattr__(name)
 
     def __getitem__(self, name: str | list) -> pd.Series | pd.DataFrame:
@@ -86,12 +93,12 @@ class Controls(gpd.GeoDataFrame):
         if isinstance(name, (list, pd.Index)) and self.active_geometry_name in name:
             name = list(name)
             name.remove(self.active_geometry_name)
-            
+
             subset = super().__getitem__(name)
             subset = subset.join(self.geometry)
-            
+
             return self._constructor(
-            subset, crs=self.crs, geometry_name=self.active_geometry_name
+                subset, crs=self.crs, geometry_name=self.active_geometry_name
             )
 
         subset = super().__getitem__(name)

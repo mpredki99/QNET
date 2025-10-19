@@ -102,7 +102,7 @@ def hz_obs_eq(
     y_stn_coeff = -np.divide(dx, distance_sq)
     orientation_coeff = -1
     x_trg_coeff = -x_stn_coeff
-    y_trg_coeff = y_stn_coeff
+    y_trg_coeff = -y_stn_coeff
     # Calculate the value of the free term
     free_term = meas_hz - azimuth(0, 0, dx, dy) + orientation
     # Reduce the value of the free term if necessary

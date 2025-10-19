@@ -27,7 +27,8 @@ class Results(AdjustmentResults):
         """Return MultiIndex object to describe observation adjustment results."""
         measurements = self._solver.dataset.measurements
 
-        index = measurements.stack(future_stack=True).index
+        index = measurements.stack().index
+
         return self._rename_level(index, "column", -1)
 
     def _get_matrix_coord_index(self) -> pd.MultiIndex:
@@ -37,7 +38,7 @@ class Results(AdjustmentResults):
         mask = coordinate_indices != INVALID_INDEX
         filtered_indices = coordinate_indices[mask]
 
-        index = filtered_indices.stack(future_stack=True).index
+        index = filtered_indices.stack().index
         return self._rename_level(index, "column", -1)
 
     def _get_matrix_orientation_index(self) -> pd.MultiIndex | None:
@@ -117,8 +118,6 @@ class Results(AdjustmentResults):
     def _get_adjusted_observation_sigmas(self) -> pd.DataFrame:
         """Return DataFrame containing adjusted observation (measurement) sigmas."""
         data = self.covariance_Y.values.diagonal()
-        df = pd.Series(data, index=self.covariance_Y.index).unstack(
-            "column", sort=False
-        )
+        df = pd.Series(data, index=self.covariance_Y.index).unstack("column")
         df.columns = [f"s{col}" for col in df.columns]
         return np.sqrt(df)
