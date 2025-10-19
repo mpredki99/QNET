@@ -9,7 +9,6 @@ from typing import Any
 
 from qgis.PyQt.QtCore import pyqtSignal
 
-from ..commands.export_output_file import ExportOutputFileCommand
 from ..dto.data_transfer_objects import OutputParams
 from .base_view_model import BaseViewModel
 
@@ -33,11 +32,6 @@ class OutputViewModel(BaseViewModel):
         self.model = model
 
         self.params = OutputParams()
-        self.export_output_file_command = ExportOutputFileCommand()
-
-    def export_output_file(self) -> Any:
-        """Import the dataset using the read data command."""
-        return self.export_output_file_command.execute(self.params)
 
     def reset_state(self) -> None:
         """Reset the input files parameters and emit signals."""

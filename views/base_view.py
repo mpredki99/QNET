@@ -8,13 +8,13 @@ from typing import Generic, Optional, TypeVar
 
 from ..view_models.base_view_model import BaseViewModel
 
-ViewModelType = TypeVar('ViewModelType', bound=BaseViewModel)
+ViewModelType = TypeVar("ViewModelType", bound=BaseViewModel)
 
 
 class BaseView(Generic[ViewModelType]):
     """
     Generic base class for all views in the MVVM architecture.
-    
+
     Provides common functionality for view-model binding and eliminates
     code duplication across view implementations.
     """

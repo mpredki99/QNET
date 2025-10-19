@@ -5,7 +5,10 @@
 # Full text of the license can be found in the LICENSE file in the repository.
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Optional
+
+
+saving_modes = Literal["Temporary layer", "To file"]
 
 
 @dataclass
@@ -39,5 +42,5 @@ class ReportParams:
 class OutputParams:
     """Gather parameters for output saving."""
 
-    output_saving_mode: str = "Temporary layer"
+    output_saving_mode: saving_modes = "Temporary layer"
     output_path: str = ""

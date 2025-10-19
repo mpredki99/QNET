@@ -46,7 +46,9 @@ class ReportView(ReportViewUI, BaseView[ReportViewModel]):
 
     def enable_report(self, enabled: bool) -> None:
         """Enable or disable report control widgets."""
-        update_checkbox_state(self.report_checkbox, Qt.Checked if enabled else Qt.Unchecked)
+        update_checkbox_state(
+            self.report_checkbox, Qt.Checked if enabled else Qt.Unchecked
+        )
         self.report_button.setEnabled(enabled)
         self.report_line_edit.setEnabled(enabled)
 

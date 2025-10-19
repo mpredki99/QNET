@@ -8,7 +8,6 @@ from typing import Any
 
 from qgis.PyQt.QtCore import pyqtSignal
 
-from ..commands.export_report import ExportReportCommand
 from ..dto.data_transfer_objects import ReportParams
 from .base_view_model import BaseViewModel
 
@@ -33,13 +32,6 @@ class ReportViewModel(BaseViewModel):
         self.model = model
 
         self.params = ReportParams()
-        self.export_report_command = ExportReportCommand()
-
-    def export_report(self) -> Any:
-        """Export the report using the export report command."""
-        if self.params.export_report and not self.params.report_path:
-            self.missing_report_path.emit()
-        return self.export_report_command.execute(self.params)
 
     def reset_state(self) -> None:
         """Reset report parameters and emit signals."""

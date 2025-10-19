@@ -9,8 +9,23 @@ from typing import Any, Optional, Tuple
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QDoubleSpinBox
 from qgis.PyQt.QtCore import QObject, pyqtSignal
-from qgis.PyQt.QtWidgets import QAction, QComboBox, QDoubleSpinBox, QMenu
+from qgis.PyQt.QtGui import QPixmap
+from qgis.PyQt.QtWidgets import (
+    QAction,
+    QComboBox,
+    QDoubleSpinBox,
+    QMenu,
+    QMessageBox,
+    QWidget,
+)
 
+from ...icons.icons import (
+    main_pixmap,
+    qnet_error_pixmap,
+    qnet_information_pixmap,
+    qnet_question_pixmap,
+    qnet_warning_pixmap,
+)
 from ...infrastructure.weighting_methods import WEIGHTING_METHODS
 
 
@@ -22,7 +37,7 @@ class QDoubleSpinBoxList(QObject):
 
     listValueChanged = pyqtSignal(tuple)
 
-    def __init__(self, n: int, parent: Optional[Any] = None) -> None:
+    def __init__(self, n: int, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self._items = [QDoubleSpinBox() for _ in range(n)]
         self.bind_spin_boxes()
@@ -92,8 +107,10 @@ class WeightingMethodComboBox(QComboBox):
     Populates itself with available methods from WEIGHTING_METHODS.
     """
 
-    def __init__(self, weighting_methods: Optional[list] = None) -> None:
-        super().__init__()
+    def __init__(
+        self, weighting_methods: Optional[list] = None, parent: Optional[QWidget] = None
+    ) -> None:
+        super().__init__(parent)
         self._populate(
             weighting_methods or [method for method in WEIGHTING_METHODS.keys()]
         )
@@ -117,3 +134,45 @@ class SavingModeMenu(QMenu):
     def _define_output_mode_actions(self) -> Tuple[QAction]:
         """Return a tuple of QAction objects for output modes."""
         return (QAction("Temporary layer", self), QAction("To file", self))
+
+
+class QNetMessageBox(QMessageBox):
+    """
+    Base message box for QNET plugin dialogs.
+    Handles title, text and custom pixmap icon.
+    """
+
+    def __init__(
+        self,
+        title: str,
+        text: str,
+        icon: QPixmap = main_pixmap,
+        parent: Optional[QWidget] = None,
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setText(text)
+        self.setStandardButtons(QMessageBox.Ok)
+        self.setIconPixmap(icon)
+        self.exec()
+
+
+class QNetErrorMessageBox(QNetMessageBox):
+    """Error message box with custom QNET error icon."""
+
+    def __init__(self, title: str, text: str, parent: Optional[QWidget] = None) -> None:
+        super().__init__(title, text, icon=qnet_error_pixmap, parent=parent)
+
+
+class QNetWarinigMessageBox(QNetMessageBox):
+    """Warning message box with custom QNET warning icon."""
+
+    def __init__(self, title: str, text: str, parent: Optional[QWidget] = None) -> None:
+        super().__init__(title, text, icon=qnet_warning_pixmap, parent=parent)
+
+
+class QNetInformationMessageBox(QNetMessageBox):
+    """Information message box for QNET with custom QNET information icon."""
+
+    def __init__(self, title: str, text: str, parent: Optional[QWidget] = None) -> None:
+        super().__init__(title, text, icon=qnet_information_pixmap, parent=parent)

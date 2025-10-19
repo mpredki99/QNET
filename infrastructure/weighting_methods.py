@@ -36,6 +36,7 @@ WEIGHTING_METHODS = {
 
 
 def get_method_label_from_name(method_name: str) -> str:
+    """Return the label for a given weighting method name."""
     for label, name in WEIGHTING_METHODS.items():
         if name == method_name:
             return label
@@ -45,6 +46,7 @@ def get_method_label_from_name(method_name: str) -> str:
 def get_method_name_and_tuning_constants(
     method_label: str,
 ) -> Tuple[str, Dict[str, float]]:
+    """Return the method name and its tuning constants for a given label."""
     method_name = WEIGHTING_METHODS.get(method_label)
     func = getattr(robust, method_name, None)
 

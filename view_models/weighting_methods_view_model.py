@@ -6,7 +6,6 @@ from typing import Any, Callable, Optional, Tuple
 
 from qgis.PyQt.QtCore import pyqtSignal
 
-from ..commands.adjust import AdjustCommand
 from ..dto.data_transfer_objects import AdjustmentParams
 from ..infrastructure import get_method_name_and_tuning_constants
 from .base_view_model import BaseViewModel
@@ -32,11 +31,6 @@ class WeightingMethodsViewModel(BaseViewModel):
         super().__init__()
         self.model = model
         self.params = AdjustmentParams()
-        self.adjust_command = AdjustCommand()
-
-    def perform_adjustment(self) -> Any:
-        """Perform the adjustment using the adjust command."""
-        return self.adjust_command.execute(self.params)
 
     def reset_state(self) -> None:
         """Reset the adjustment parameters and emit signals."""

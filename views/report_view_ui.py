@@ -4,7 +4,7 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-from qgis.PyQt.QtWidgets import QCheckBox, QLabel, QLineEdit, QPushButton, QVBoxLayout
+from qgis.PyQt.QtWidgets import QCheckBox, QLabel, QLineEdit, QPushButton
 
 from .base_view_ui import BaseViewUI
 from .components.layouts import FileLayout
