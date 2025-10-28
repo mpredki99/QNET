@@ -36,6 +36,11 @@ class SpeedXYWConstructor(MatrixXYWConstructor):
         if calculate_weights:
             self._prepare_sigma_data(index_names)
 
+        if "trg_h" not in self._prepared_dataset.columns:
+            self._prepared_dataset["trg_h"] = 0
+        if "stn_h" not in self._prepared_dataset.columns:
+            self._prepared_dataset["stn_h"] = 0
+
     def _prepare_measurement_data(self) -> list[str]:
         measurement_data = self._dataset.measurements.measurement_data
         station_columns = self._dataset.stations.columns

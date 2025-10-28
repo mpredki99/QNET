@@ -25,7 +25,7 @@ class Results(AdjustmentResults):
 
     def _get_obs_index(self) -> pd.MultiIndex:
         """Return MultiIndex object to describe observation adjustment results."""
-        measurements = self._solver.dataset.measurements
+        measurements = self._solver.dataset.measurements.measurement_data
 
         index = measurements.stack().index
 
@@ -113,7 +113,7 @@ class Results(AdjustmentResults):
     def _get_adjusted_observation_values(self) -> pd.DataFrame:
         """Return DataFrame containing adjusted observation (measurement) values."""
         df = self.obs_residuals.rename(columns=lambda col: col[1:])
-        return self._solver.dataset.measurements - df
+        return self._solver.dataset.measurements.measurement_data - df
 
     def _get_adjusted_observation_sigmas(self) -> pd.DataFrame:
         """Return DataFrame containing adjusted observation (measurement) sigmas."""

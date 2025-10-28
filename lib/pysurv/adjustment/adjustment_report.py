@@ -22,13 +22,29 @@ class AdjustmentReport(ABC):
         self._title = "----- ADJUSTMENT REPORT -----"
 
         self._calculation_information_header = "CALCULATION INFORMATION"
-        self._calculation_information = {
+        self._adjustment_method_information_header = "ADJUSTMNET METHOD INFORMATION"
+        self._network_specification_header = "NETWORK SPECIFICATION"
+        self._residual_sigma_information_header = "RESIDUAL SIGMA INFORMATION"
+        self._controls_information_header = "CONTROLS INFORMATION"
+        self._observations_information_header = "OBSERVATIONS INFORMATION"
+
+        self._footer = [
+            "Calculations made with pysurv, by Michal Predki. \n",
+            "Github repository: https://github.com/mpredki99/pysurv.\n",
+            "You can contact me on LinkedIn for feedback or if you discover a bug.\n",
+            " ",
+        ]
+
+    @property
+    def _calculation_information(self):
+        return {
             "- adjustment status:": self._results.calculation_status,
             "- number of iterations:": self._results.n_iter,
         }
 
-        self._adjustment_method_information_header = "ADJUSTMNET METHOD INFORMATION"
-        self._adjustment_method_information = {
+    @property
+    def _adjustment_method_information(self):
+        return {
             "- method of adjustment observations:": self._results.methods.obs_adj,
             "- observation adjustment tuning constants:": self._format_tuning_constants(
                 self._results.methods.obs_tuning_constants
@@ -40,8 +56,9 @@ class AdjustmentReport(ABC):
             "- free adjustment inner constraints applied:": self._results.inner_constraints,
         }
 
-        self._network_specification_header = "NETWORK SPECIFICATION"
-        self._network_specification = {
+    @property
+    def _network_specification(self):
+        return {
             "- number of observations:": self._results.n_measurements,
             "- number of coordinate corrections:": self._results.n_coord_corrections,
             "- number of movable tie points:": self._results.n_movable_tie_points,
@@ -50,24 +67,20 @@ class AdjustmentReport(ABC):
             "- number degrees of freedom:": self._results.degrees_of_freedom,
         }
 
-        self._residual_sigma_information_header = "RESIDUAL SIGMA INFORMATION"
-        self._residual_sigma_information = {
+    @property
+    def _residual_sigma_information(self):
+        return {
             "- residual sigma:": self._results.residual_sigma.round(5),
             "- coord correction sigma:": self._results.coord_correction_sigma.round(5),
         }
 
-        self._controls_information_header = "CONTROLS INFORMATION"
-        self._controls_information = self._prepare_controls_information_table()
+    @property
+    def controls_information_table(self):
+        return self._prepare_controls_information_table()
 
-        self._observations_information_header = "OBSERVATIONS INFORMATION"
-        self._observations_information = self._prepare_observations_information_table()
-
-        self._footer = [
-            "Calculations made with pysurv, by Michal Predki. \n",
-            "Github repository: https://github.com/mpredki99/pysurv.\n",
-            "You can contact me on LinkedIn for feedback or if you discover a bug.\n",
-            " ",
-        ]
+    @property
+    def _observations_information(self):
+        return self._prepare_observations_information_table()
 
     def __bool__(self):
         if not self._results:
@@ -106,7 +119,7 @@ class AdjustmentReport(ABC):
     @property
     def controls_information(self):
         text = self._controls_information_header + "\n"
-        text += str(self._controls_information.round(3))
+        text += str(self.controls_information_table.round(3))
         return text
 
     @property

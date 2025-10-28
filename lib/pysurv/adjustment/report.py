@@ -41,7 +41,7 @@ class Report(AdjustmentReport):
 
     def to_txt(self, filename: str) -> None:
         controls_information = self._controls_information_header + "\n"
-        controls_information += self._controls_information.to_string()
+        controls_information += self.controls_information_table.to_string()
 
         observations_information = self._observations_information_header + "\n"
         observations_information += self._observations_information.to_string()
@@ -82,8 +82,10 @@ class Report(AdjustmentReport):
     def _prepare_observations_information_table(self):
         approx_observation = self._dataset.measurements_view.drop(
             columns=self._dataset.measurements.sigma_columns
-        ).rename(
-            columns={col: f"{col}_0" for col in self._dataset.measurements.columns},
+        )
+
+        approx_observation = approx_observation.rename(
+            columns={col: f"{col}_0" for col in approx_observation.columns},
         )
 
         obs_residuals = self._results.obs_residuals.copy()
