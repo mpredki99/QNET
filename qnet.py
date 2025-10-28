@@ -10,8 +10,8 @@ from qgis.core import *
 from qgis.gui import *
 from qgis.PyQt.QtWidgets import QAction
 
-from . import models
 from .icons.icons import main_icon
+from .models.main_model import MainModel
 from .view_models import MainViewModel
 from .views import MainView
 
@@ -32,22 +32,7 @@ class QNet:
         self.iface.removeToolBarIcon(self.action)
 
     def run(self):
-        model = models
+        model = MainModel()
         view_model = MainViewModel(model)
         view = MainView(view_model)
         view.exec()
-
-
-if __name__ == "__main__":
-    from qgis.PyQt.QtWidgets import QApplication
-    from qgis.utils import iface
-
-    app = QApplication([])
-    main_icon = QNet(iface)
-    # Test GUI
-    # qnet.run()
-
-    # Test logic
-    model = models
-    view_model = MainViewModel(model)
-    view_model.perform_adjustment()

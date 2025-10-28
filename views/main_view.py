@@ -49,7 +49,7 @@ class MainView(MainViewUI):
         """Bind view model signals to UI update methods."""
         self.view_model.error_occured.connect(self.show_error_message)
         self.view_model.warining_occured.connect(self.show_warning_message)
-        self.view_model.info_occured.connect(self.show_info_message)
+        self.view_model.success_occured.connect(self.show_info_message)
 
     def perform_adjustment(self) -> None:
         """Perform the adjustment."""

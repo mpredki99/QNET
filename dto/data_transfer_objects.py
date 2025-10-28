@@ -7,7 +7,6 @@
 from dataclasses import dataclass
 from typing import Literal, Optional
 
-
 saving_modes = Literal["Temporary layer", "To file"]
 
 

@@ -5,7 +5,10 @@
 # Full text of the license can be found in the LICENSE file in the repository.
 
 import os
+from pathlib import Path
+from typing import Optional
 
+import pandas as pd
 import pysurv as ps
 from qgis.core import (
     QgsCoordinateTransformContext,
@@ -22,94 +25,148 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 
 from ..dto.data_transfer_objects import OutputParams
-from ..qnet_exceptions import OutputError
+from .results.output_result import OutputResult
+from .results.result import Result
 
 
-def create_output_layer(project: ps.Project, output_params: OutputParams):
-    """Create QGIS point layer and add it to the QGIS project."""
-    try:
+class QGisModel:
+    def __init__(self) -> None:
+        self._points_data = None
+        self._layer = None
+        self._data_provider = None
 
-        layer = create_layer(project.dataset.controls, output_params.output_path)
-        # Add to project
-        QgsProject.instance().addMapLayer(layer)
-        return layer
-    except:
-        raise OutputError
+    @property
+    def points_data(self):
+        return self._points_data
 
+    @property
+    def layer(self):
+        return self._layer
 
-def create_output_file(project: ps.Project, output_params: OutputParams):
-    """Create file with points geometry and add it to the QGIS project."""
-    filepath = output_params.output_path
+    @property
+    def data_provider(self):
+        return self._data_provider
 
-    if not filepath.lower().endswith(".shp"):
-        filepath += ".shp"
+    @property
+    def geometry_type(self) -> Optional[str]:
+        if self.points_data is None:
+            return
+        return "PointZ" if "z" in self.points_data.columns else "Point"
 
-    layer_name = os.path.basename(filepath).split(".")[0]
-    try:
-        layer = create_layer(project.dataset.controls, layer_name)
-    except:
-        raise OutputError
+    @property
+    def crs(self) -> Optional[str]:
+        crs = getattr(self.points_data, "crs", None)
+        epsg = crs.to_epsg() if crs else None
+        return f"crs=EPSG:{epsg}" if epsg else ""
 
-    # Remove existing file if needed
-    for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg"]:
-        file = os.path.splitext(filepath)[0] + ext
-        if os.path.exists(file):
-            os.remove(file)
+    def create_output_layer(
+        self, project: ps.Project, output_params: OutputParams
+    ) -> Result:
+        try:
+            self._points_data = project.adjustment.report.controls_information_table
+            self._create_layer(
+                output_params.output_path
+                if output_params.output_path
+                else "Adjusted_points"
+            )
+            QgsProject.instance().addMapLayer(self.layer)
 
-    # Create options
-    options = QgsVectorFileWriter.SaveVectorOptions()
-    options.driverName = "ESRI Shapefile"
-    options.fileEncoding = "UTF-8"
-    options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteFile
+            return OutputResult.success("Output layer created.", output=self.layer)
 
-    # Write the layer file
-    error = QgsVectorFileWriter.writeAsVectorFormatV2(
-        layer, filepath, QgsCoordinateTransformContext(), options
-    )
+        except Exception as err:
+            return OutputResult.error(str(err))
 
-    if error[0] != QgsVectorFileWriter.NoError:
-        raise OutputError
+    def create_output_file(
+        self, project: ps.Project, output_params: OutputParams
+    ) -> Result:
+        try:
+            self._points_data = project.dataset.controls
+            filepath = Path(output_params.output_path)
+            self._create_layer(filepath.stem)
+            # Add file extension if needed
+            if not filepath.suffix == ".shp":
+                filepath = filepath.with_suffix(".shp")
 
-    shp_layer = QgsVectorLayer(filepath, layer_name, "ogr")
-    QgsProject.instance().addMapLayer(shp_layer)
-    return shp_layer
+            # Remove existing file if needed
+            for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg"]:
+                filepath.with_suffix(ext).unlink(missing_ok=True)
 
+            # Create options
+            options = QgsVectorFileWriter.SaveVectorOptions()
+            options.driverName = "ESRI Shapefile"
+            options.fileEncoding = "UTF-8"
+            options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteFile
 
-def create_layer(controls, name):
+            # Write the layer file
+            error = QgsVectorFileWriter.writeAsVectorFormatV2(
+                self.layer, str(filepath), QgsCoordinateTransformContext(), options
+            )
 
-    geometry_type = "PointZ" if "z" in controls.coordinate_columns else "Point"
+            if error[0] != QgsVectorFileWriter.NoError:
+                return OutputResult.error(str(error[0]))
 
-    epsg = controls.crs.to_epsg() if controls.crs else None
-    crs_str = f"crs=EPSG:{epsg}" if epsg else ""
+            shp_layer = QgsVectorLayer(str(filepath), str(filepath.stem), "ogr")
+            QgsProject.instance().addMapLayer(shp_layer)
 
-    layer_name = name if name else "Adjusted_points"
+            return OutputResult.success("Output layer file created.", output=shp_layer)
 
-    layer = QgsVectorLayer(f"{geometry_type}?{crs_str}", layer_name, "memory")
-    provider = layer.dataProvider()
+        except Exception as err:
+            return OutputResult.error(str(err))
 
-    # Create fields
-    fields = QgsFields()
-    for col in controls.columns:
-        fields.append(QgsField(col, QVariant.Double))
-
-    provider.addAttributes(fields)
-    layer.updateFields()
-
-    # Create features
-    feats = []
-    for _, row in controls.iterrows():
-        feat = QgsFeature()
-        x, y = float(row["x"]), float(row["y"])
-        z = float(row["z"]) if "z" in controls.coordinate_columns else None
-        geom = (
-            QgsGeometry.fromPoint(QgsPoint(x, y, z))
-            if z is not None
-            else QgsGeometry.fromPointXY(QgsPointXY(x, y))
+    def _create_layer(self, layer_name: str) -> QgsVectorLayer:
+        """Create QGIS layer object."""
+        self._layer = QgsVectorLayer(
+            f"{self.geometry_type}?{self.crs}", layer_name, "memory"
         )
-        feat.setGeometry(geom)
-        feat.setAttributes(list(row))
-        feats.append(feat)
+        self._data_provider = self.layer.dataProvider()
 
-    provider.addFeatures(feats)
-    layer.updateExtents()
-    return layer
+        self._create_layer_fields()
+        self._create_layer_features()
+
+    def _create_layer_fields(self) -> None:
+        fields = QgsFields()
+        # Create index field
+        id_field = QgsField("id", QVariant.String)
+        fields.append(id_field)
+        # Create attributes field
+        for col in self.points_data.columns:
+            dtype = self.get_field_dtype(self.points_data[col])
+            field = QgsField(col, dtype)
+            fields.append(field)
+
+        self.data_provider.addAttributes(fields)
+        self.layer.updateFields()
+
+    def _create_layer_features(self) -> None:
+        feats = []
+
+        for row in self.points_data.itertuples():
+            feat = QgsFeature()
+            x = getattr(row, "x")
+            y = getattr(row, "y")
+            z = getattr(row, "z", None)
+
+            geom = (
+                QgsGeometry.fromPoint(QgsPoint(x, y, z))
+                if z is not None
+                else QgsGeometry.fromPointXY(QgsPointXY(x, y))
+            )
+            feat.setGeometry(geom)
+            feat.setAttributes(list(row))
+            feats.append(feat)
+
+        self.data_provider.addFeatures(feats)
+        self.layer.updateExtents()
+
+    @staticmethod
+    def get_field_dtype(column):
+        dtype = column.dtype
+        if pd.api.types.is_integer_dtype(dtype):
+            return QVariant.Int
+        if pd.api.types.is_float_dtype(dtype):
+            return QVariant.Double
+        if pd.api.types.is_bool_dtype(dtype):
+            return QVariant.Bool
+        if pd.api.types.is_datetime64_any_dtype(dtype):
+            return QVariant.DateTime
+        return QVariant.String

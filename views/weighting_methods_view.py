@@ -41,9 +41,9 @@ class WeightingMethodsView(WeightingMethodsViewUI, BaseView[WeightingMethodsView
         self.free_adjustment_checkbox.stateChanged.connect(
             self.view_model.switch_free_adjustment
         )
-        self.free_adjustment_weighting_method_combo_box.currentIndexChanged[str].connect(
-            self.view_model.update_free_adjustment_weighting_method
-        )
+        self.free_adjustment_weighting_method_combo_box.currentIndexChanged[
+            str
+        ].connect(self.view_model.update_free_adjustment_weighting_method)
         self.free_adjustment_weighting_method_tuning_constants.listValueChanged.connect(
             self.view_model.update_free_adjustment_tuning_constants
         )

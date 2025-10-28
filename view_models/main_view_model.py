@@ -4,17 +4,19 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-import os.path
+from functools import partial
+from pathlib import Path
 from typing import Optional
 
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 
-from ..models import Models
-from ..qnet_exceptions import QNetException
+from ..models.main_model import MainModel
+from ..models.results.result import Result, ResultStatus
 from .input_files_view_model import InputFilesViewModel
 from .output_view_model import OutputViewModel
 from .report_view_model import ReportViewModel
 from .weighting_methods_view_model import WeightingMethodsViewModel
+from .workflow import Workflow
 
 
 class MainViewModel(QObject):
@@ -29,11 +31,11 @@ class MainViewModel(QObject):
 
     error_occured = pyqtSignal(str, str)
     warining_occured = pyqtSignal(str, str)
-    info_occured = pyqtSignal(str, str)
+    success_occured = pyqtSignal(str, str)
 
     def __init__(
         self,
-        model: Optional[Models] = None,
+        model: Optional[MainModel] = None,
         input_files_view_model=InputFilesViewModel(),
         weighting_methods_view_model=WeightingMethodsViewModel(),
         report_view_model=ReportViewModel(),
@@ -51,46 +53,64 @@ class MainViewModel(QObject):
 
     def perform_adjustment(self) -> None:
         """Perform the network adjustment and export results."""
-        try:
-            project = self.pysurv_model.create_project(
-                self.input_files_view_model.params
+        Workflow(
+            partial(
+                self.pysurv_model.create_project, self.input_files_view_model.params
+            ),
+            partial(self._emit_result_signal, emit_success=False),
+        ).add_step(
+            Workflow(
+                partial(
+                    self.pysurv_model.adjust, self.weighting_methods_view_model.params
+                ),
+                partial(self._emit_result_signal, emit_success=False),
             )
-
-            warning = self.pysurv_model.adjust(
-                project, self.weighting_methods_view_model.params
+        ).add_step(
+            Workflow(
+                partial(self.pysurv_model.export_report, self.report_view_model.params),
+                partial(self._emit_result_signal, emit_success=True),
+                skip=not self.report_view_model.params.export_report,
+                prepare_func=self._prepare_report_path,
             )
-            if warning:
-                self.warining_occured.emit(warning.type, warning.message)
+        ).run()
 
-            if self.report_view_model.params.export_report:
-                if not self.report_view_model.params.report_path:
-                    self.report_view_model.update_report_path(
-                        os.path.join(
-                            os.path.dirname(
-                                self.input_files_view_model.params.controls_file_path
-                            ),
-                            "report.txt",
-                        )
-                    )
-                if project.adjustment is not None:
-                    self.pysurv_model.export_report(
-                        project, self.report_view_model.params
-                    )
-                    self.info_occured.emit(
-                        "Report exported",
-                        f"Report file has been exported: {self.report_view_model.params.report_path}",
-                    )
+        Workflow(
+            partial(
+                self._get_output_handler(),
+                self.pysurv_model.project,
+                self.output_view_model.params,
+            ),
+            partial(self._emit_result_signal, emit_success=False),
+        ).run()
 
-            output_methods = {
-                "Temporary layer": self.qgis_model.create_output_layer,
-                "To file": self.qgis_model.create_output_file,
-            }
-            output_method = output_methods.get(
-                self.output_view_model.params.output_saving_mode
-            )
-            output_method(project, self.output_view_model.params)
+    def _prepare_report_path(self) -> None:
+        """Set default report path into control points directory if were not specified."""
+        if self.report_view_model.params.report_path:
+            return
 
-        except QNetException as err:
-            self.error_occured.emit(err.type, err.message)
+        controls_file_dir = Path(
+            self.input_files_view_model.params.controls_file_path
+        ).parent
 
-        # self.output_view_model.export_output_file()
+        self.report_view_model.update_report_path(
+            str(controls_file_dir.joinpath("report.txt"))
+        )
+
+    def _get_output_handler(self):
+        output_methods = {
+            "Temporary layer": self.qgis_model.create_output_layer,
+            "To file": self.qgis_model.create_output_file,
+        }
+        return output_methods.get(self.output_view_model.params.output_saving_mode)
+
+    def _emit_result_signal(self, result: Result, emit_success: bool = True) -> None:
+        """Emit signal corresponding to the result status."""
+        if result.status == ResultStatus.SUCCESS and not emit_success:
+            return
+        signals = {
+            ResultStatus.SUCCESS: self.success_occured,
+            ResultStatus.WARNING: self.warining_occured,
+            ResultStatus.ERROR: self.error_occured,
+        }
+        signal = signals.get(result.status)
+        signal.emit(result.title, result.message)

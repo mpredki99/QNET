@@ -4,6 +4,6 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-from .main_model import MainModel
+from .result import Result, ResultStatus
 
-__all__ = ["MainModel"]
+__all__ = ["Result", "ResultStatus"]
