@@ -7,6 +7,7 @@
 from typing import Optional
 
 from ..view_models import MainViewModel
+from .base_views import BaseView
 from .components.widgets import (
     QNetErrorMessageBox,
     QNetInformationMessageBox,
@@ -15,7 +16,7 @@ from .components.widgets import (
 from .main_view_ui import MainViewUI
 
 
-class MainView(MainViewUI):
+class MainView(MainViewUI, BaseView):
     """
     Main dialog logic for the QNET plugin.
 
@@ -37,9 +38,6 @@ class MainView(MainViewUI):
         )
         self.report_view.view_model = self.view_model.report_view_model
         self.output_view.view_model = self.view_model.output_view_model
-
-        self.bind_widgets()
-        self.bind_view_model_signals()
 
     def bind_widgets(self) -> None:
         """Bind widget signals to their respective handlers."""

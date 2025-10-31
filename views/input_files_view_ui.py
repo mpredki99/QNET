@@ -8,11 +8,11 @@ from typing import Iterator
 
 from qgis.PyQt.QtWidgets import QLabel, QLineEdit, QPushButton, QVBoxLayout
 
-from .base_view_ui import BaseViewUI
+from .base_views_ui import BaseViewSectionUI
 from .components.layouts import FileLayout
 
 
-class InputFilesViewUI(BaseViewUI):
+class InputFilesViewUI(BaseViewSectionUI):
     """
     UI base for the input files section in the QNET plugin.
 

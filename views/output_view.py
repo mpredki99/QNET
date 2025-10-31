@@ -8,12 +8,12 @@ from functools import partial
 from typing import Optional
 
 from ..view_models.output_view_model import OutputViewModel
-from .base_view import BaseView
+from .base_views import BaseViewSection
 from .components.utils import get_file_path_from_dialog_window, update_line_edit
 from .output_view_ui import OutputViewUI
 
 
-class OutputView(OutputViewUI, BaseView[OutputViewModel]):
+class OutputView(OutputViewUI, BaseViewSection[OutputViewModel]):
     """
     Output section logic and UI for the QNET plugin.
 

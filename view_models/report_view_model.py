@@ -4,15 +4,13 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-from typing import Any
-
 from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import ReportParams
-from .base_view_model import BaseViewModel
+from .base_view_model import BaseViewModelSection
 
 
-class ReportViewModel(BaseViewModel):
+class ReportViewModel(BaseViewModelSection):
     """
     ViewModel for managing report export options and state in the QNET plugin.
 

@@ -17,21 +17,32 @@ from .views import MainView
 
 
 class QNet:
-    def __init__(self, iface: Optional["QgisInterface"]):
+    """
+    QGIS plugin for integrated surveying network adjustment.
+
+    Provides a graphical user interface for surveying network adjustment workflows,
+    including file import, adjustment computation, exporting of reports and
+    control points geometry.
+    """
+
+    def __init__(self, iface: Optional["QgisInterface"]) -> None:
         self.iface = iface
         self.action = None
 
-    def initGui(self):
+    def initGui(self) -> None:
+        """Initialize the GUI for the plugin."""
         self.action = QAction(main_icon, "QNET", self.iface.mainWindow())
         self.action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu("&QNET", self.action)
 
-    def unload(self):
+    def unload(self) -> None:
+        """Unload the plugin and remove GUI elements."""
         self.iface.removePluginMenu("&QNET", self.action)
         self.iface.removeToolBarIcon(self.action)
 
-    def run(self):
+    def run(self) -> None:
+        """Run the main dialog of the plugin."""
         model = MainModel()
         view_model = MainViewModel(model)
         view = MainView(view_model)

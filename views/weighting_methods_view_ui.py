@@ -6,12 +6,12 @@
 
 from qgis.PyQt.QtWidgets import QCheckBox, QHBoxLayout, QLabel
 
-from .base_view_ui import BaseViewUI
+from .base_views_ui import BaseViewSectionUI
 from .components.layouts import WeightingMethodLayout
 from .components.widgets import QDoubleSpinBoxList, WeightingMethodComboBox
 
 
-class WeightingMethodsViewUI(BaseViewUI):
+class WeightingMethodsViewUI(BaseViewSectionUI):
     """
     UI base for the weighting methods section in the QNET plugin.
 

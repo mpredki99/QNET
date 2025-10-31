@@ -9,7 +9,7 @@ from typing import Optional
 from qgis.PyQt.QtCore import Qt
 
 from ..view_models.report_view_model import ReportViewModel
-from .base_view import BaseView
+from .base_views import BaseViewSection
 from .components.utils import (
     get_file_path_from_dialog_window,
     update_checkbox_state,
@@ -18,7 +18,7 @@ from .components.utils import (
 from .report_view_ui import ReportViewUI
 
 
-class ReportView(ReportViewUI, BaseView[ReportViewModel]):
+class ReportView(ReportViewUI, BaseViewSection[ReportViewModel]):
     """
     View class for the report section in the QNET plugin.
 

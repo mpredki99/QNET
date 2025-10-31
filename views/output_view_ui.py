@@ -6,14 +6,14 @@
 
 from typing import Iterator
 
-from qgis.PyQt.QtWidgets import QLabel, QLineEdit, QPushButton, QVBoxLayout
+from qgis.PyQt.QtWidgets import QLabel, QLineEdit, QPushButton
 
-from .base_view_ui import BaseViewUI
+from .base_views_ui import BaseViewSectionUI
 from .components.layouts import FileLayout
 from .components.widgets import SavingModeMenu
 
 
-class OutputViewUI(BaseViewUI):
+class OutputViewUI(BaseViewSectionUI):
     """
     UI base for the output section in the QNET plugin.
 

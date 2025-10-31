@@ -6,12 +6,15 @@
 
 from functools import partial
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
-from qgis.PyQt.QtCore import QObject, pyqtSignal
+from pysurv import Project
+from qgis.PyQt.QtCore import pyqtSignal
 
+from ..dto.data_transfer_objects import OutputParams
 from ..models.main_model import MainModel
 from ..models.results.result import Result, ResultStatus
+from .base_view_model import BaseViewModel
 from .input_files_view_model import InputFilesViewModel
 from .output_view_model import OutputViewModel
 from .report_view_model import ReportViewModel
@@ -19,7 +22,7 @@ from .weighting_methods_view_model import WeightingMethodsViewModel
 from .workflow import Workflow
 
 
-class MainViewModel(QObject):
+class MainViewModel(BaseViewModel):
     """
     Main view model for the QNET plugin.
 
@@ -53,16 +56,17 @@ class MainViewModel(QObject):
 
     def perform_adjustment(self) -> None:
         """Perform the network adjustment and export results."""
-        Workflow(
-            partial(
-                self.pysurv_model.create_project, self.input_files_view_model.params
-            ),
+        if not self._run_pysurv_workflow():
+            return  # Break if pysurv workflow failed
+        self._run_qgis_workflow()
+        
+    def _run_pysurv_workflow(self) -> bool:
+        return Workflow(
+            partial(self.pysurv_model.create_project, self.input_files_view_model.params),
             partial(self._emit_result_signal, emit_success=False),
         ).add_step(
             Workflow(
-                partial(
-                    self.pysurv_model.adjust, self.weighting_methods_view_model.params
-                ),
+                partial(self.pysurv_model.adjust, self.weighting_methods_view_model.params),
                 partial(self._emit_result_signal, emit_success=False),
             )
         ).add_step(
@@ -74,9 +78,10 @@ class MainViewModel(QObject):
             )
         ).run()
 
-        Workflow(
+    def _run_qgis_workflow(self) -> bool:
+        return Workflow(
             partial(
-                self._get_output_handler(),
+                self._handle_output_saving_mode(),
                 self.pysurv_model.project,
                 self.output_view_model.params,
             ),
@@ -96,7 +101,8 @@ class MainViewModel(QObject):
             str(controls_file_dir.joinpath("report.txt"))
         )
 
-    def _get_output_handler(self):
+    def _handle_output_saving_mode(self) -> Callable[[Project, OutputParams], Result]:
+        """Return output handler method based on the selected output saving mode."""
         output_methods = {
             "Temporary layer": self.qgis_model.create_output_layer,
             "To file": self.qgis_model.create_output_file,
@@ -107,6 +113,7 @@ class MainViewModel(QObject):
         """Emit signal corresponding to the result status."""
         if result.status == ResultStatus.SUCCESS and not emit_success:
             return
+
         signals = {
             ResultStatus.SUCCESS: self.success_occured,
             ResultStatus.WARNING: self.warining_occured,

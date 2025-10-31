@@ -37,10 +37,13 @@ class Workflow:
         """Run this workflow step and all chained steps."""
         if not self._run_self(self):
             return False
-        if self.steps:
-            for step in self.steps:
-                if not step.run():
-                    return False
+
+        if not self.steps:
+            return True
+
+        for step in self.steps:
+            if not step.run():
+                return False
         return True
 
     @staticmethod

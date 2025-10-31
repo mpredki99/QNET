@@ -7,12 +7,12 @@
 from typing import Optional
 
 from ..view_models.input_files_view_model import InputFilesViewModel
-from .base_view import BaseView
+from .base_views import BaseViewSection
 from .components.utils import get_file_path_from_dialog_window, update_line_edit
 from .input_files_view_ui import InputFilesViewUI
 
 
-class InputFilesView(InputFilesViewUI, BaseView[InputFilesViewModel]):
+class InputFilesView(InputFilesViewUI, BaseViewSection[InputFilesViewModel]):
     """
     View class for the input files section in the QNET plugin.
 

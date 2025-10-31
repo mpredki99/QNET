@@ -12,6 +12,12 @@ class BaseViewModel(QObject):
     def __init__(self, model=None) -> None:
         super().__init__()
 
+
+class BaseViewModelSection(BaseViewModel):
+
+    def __init__(self, model=None) -> None:
+        super().__init__()
+
     def reset_state(self) -> None:
         """Reset the params state and emit signals."""
         raise NotImplementedError(

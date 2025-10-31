@@ -119,6 +119,14 @@ class WeightingMethodComboBox(QComboBox):
         """Populate widget with supported weighting methods."""
         self.addItems(weighting_methods)
 
+    @property
+    def currentTextChanged(self):
+        """Provides the currentTextChanged signal, handling compatibility for both PyQt5 and PyQt6."""
+        try:
+            return super().currentTextChanged
+        except AttributeError:
+            return super().currentIndexChanged[str]
+
 
 class SavingModeMenu(QMenu):
     """

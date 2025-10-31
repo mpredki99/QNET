@@ -5,15 +5,14 @@
 # Full text of the license can be found in the LICENSE file in the repository.
 
 from functools import partial
-from typing import Any
 
 from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import OutputParams
-from .base_view_model import BaseViewModel
+from .base_view_model import BaseViewModelSection
 
 
-class OutputViewModel(BaseViewModel):
+class OutputViewModel(BaseViewModelSection):
     """
     View model for the output section in the QNET plugin.
 

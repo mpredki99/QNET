@@ -9,13 +9,15 @@ from typing import Optional, Tuple
 
 from ..infrastructure import get_method_label_from_name
 from ..view_models.weighting_methods_view_model import WeightingMethodsViewModel
-from .base_view import BaseView
-from .components.utils import update_checkbox_state
+from .base_views import BaseViewSection
+from .components.utils import update_checkbox_state, update_combo_box_text
 from .components.widgets import QDoubleSpinBoxList, WeightingMethodComboBox
 from .weighting_methods_view_ui import WeightingMethodsViewUI
 
 
-class WeightingMethodsView(WeightingMethodsViewUI, BaseView[WeightingMethodsViewModel]):
+class WeightingMethodsView(
+    WeightingMethodsViewUI, BaseViewSection[WeightingMethodsViewModel]
+):
     """
     View class for the weighting methods section in the QNET plugin.
 
@@ -32,7 +34,7 @@ class WeightingMethodsView(WeightingMethodsViewUI, BaseView[WeightingMethodsView
 
     def bind_widgets(self) -> None:
         """Bind UI widgets to their handlers."""
-        self.observation_weighting_method_combo_box.currentIndexChanged[str].connect(
+        self.observation_weighting_method_combo_box.currentTextChanged.connect(
             self.view_model.update_observation_weighting_method
         )
         self.observation_weighting_method_tuning_constants.listValueChanged.connect(
@@ -41,9 +43,9 @@ class WeightingMethodsView(WeightingMethodsViewUI, BaseView[WeightingMethodsView
         self.free_adjustment_checkbox.stateChanged.connect(
             self.view_model.switch_free_adjustment
         )
-        self.free_adjustment_weighting_method_combo_box.currentIndexChanged[
-            str
-        ].connect(self.view_model.update_free_adjustment_weighting_method)
+        self.free_adjustment_weighting_method_combo_box.currentTextChanged.connect(
+            self.view_model.update_free_adjustment_weighting_method
+        )
         self.free_adjustment_weighting_method_tuning_constants.listValueChanged.connect(
             self.view_model.update_free_adjustment_tuning_constants
         )
@@ -105,13 +107,7 @@ class WeightingMethodsView(WeightingMethodsViewUI, BaseView[WeightingMethodsView
     ) -> None:
         """Set the combo box index to the given weighting method."""
         method_label = get_method_label_from_name(method_name)
-
-        if method_label == combo_box.currentText():
-            return
-
-        index = combo_box.findText(method_label)
-        if index != -1:
-            combo_box.setCurrentIndex(index)
+        update_combo_box_text(combo_box, method_label)
 
     def _refresh_tuning_constant_spin_boxes(
         self,

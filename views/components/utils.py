@@ -6,9 +6,7 @@
 
 from typing import Literal
 
-from qgis.PyQt.QtWidgets import QCheckBox, QFileDialog, QLineEdit, QWidget
-
-get_file_name_mode = Literal["open", "save"]
+from qgis.PyQt.QtWidgets import QCheckBox, QComboBox, QFileDialog, QLineEdit, QWidget
 
 
 def get_file_path_from_dialog_window(
@@ -16,7 +14,7 @@ def get_file_path_from_dialog_window(
     window_title: str,
     dir: str,
     file_filter: str,
-    mode: get_file_name_mode,
+    mode: Literal["open", "save"],
 ) -> str:
     """Open file dialog and return selected file path."""
     modes = {
@@ -45,3 +43,13 @@ def update_checkbox_state(checkbox: QCheckBox, state: int) -> None:
     if state == checkbox.checkState():
         return
     checkbox.setCheckState(state)
+
+
+def update_combo_box_text(combo_box: QComboBox, text: str) -> None:
+    """Set combo box text, if different from current."""
+    if text == combo_box.currentText():
+        return
+
+    index = combo_box.findText(text)
+    if index != -1:
+        combo_box.setCurrentIndex(index)

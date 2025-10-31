@@ -4,15 +4,16 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-from qgis.PyQt.QtWidgets import QDialog, QPushButton, QVBoxLayout
+from qgis.PyQt.QtWidgets import QPushButton, QVBoxLayout
 
+from .base_views_ui import BaseViewUI
 from .input_files_view import InputFilesView
 from .output_view import OutputView
 from .report_view import ReportView
 from .weighting_methods_view import WeightingMethodsView
 
 
-class MainViewUI(QDialog):
+class MainViewUI(BaseViewUI):
     """
     Main dialog UI for the QNET plugin.
 
@@ -25,6 +26,10 @@ class MainViewUI(QDialog):
         self.setWindowTitle("QNET")
         self.resize(430, 285)
 
+        layout = self.build_layout()
+        self.setLayout(layout)
+
+    def build_layout(self):
         layout = QVBoxLayout()
 
         self.input_file_view = InputFilesView()
@@ -40,4 +45,4 @@ class MainViewUI(QDialog):
         layout.addSpacing(10)
         layout.addWidget(self.ok_button)
 
-        self.setLayout(layout)
+        return layout

@@ -36,7 +36,6 @@ class BaseView(Generic[ViewModelType]):
 
         self.bind_widgets()
         self.bind_view_model_signals()
-        self._view_model.reset_state()
 
     def bind_widgets(self):
         """Bind UI widgets to their respective handlers."""
@@ -49,3 +48,20 @@ class BaseView(Generic[ViewModelType]):
         raise NotImplementedError(
             f"{self.__class__.__name__} must implement bind_view_model_signals()"
         )
+
+
+class BaseViewSection(BaseView[ViewModelType]):
+    """
+    Generic base class for all views in the MVVM architecture.
+
+    Provides common functionality for view-model binding and eliminates
+    code duplication across view implementations.
+    """
+
+    @BaseView.view_model.setter
+    def view_model(self, view_model: Optional[ViewModelType]) -> None:
+        """Set the view model and bind widgets and signals if it's not None."""
+        BaseView.view_model.fset(self, view_model)
+        if not self._view_model:
+            return
+        self._view_model.reset_state()

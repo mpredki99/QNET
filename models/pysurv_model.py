@@ -91,7 +91,7 @@ class PySurvModel:
                 return AdjustmentResult.error(str(err), output=self.project)
 
             if warns:
-                return AdjustmentResult.warning(message=str(warns[0].message))
+                return AdjustmentResult.warning(message=str(warns[-1].message))
             return AdjustmentResult.success(
                 "Adjustment converged successfully.", output=self.project.adjustment
             )
@@ -105,5 +105,4 @@ class PySurvModel:
                 output=self.project.adjustment.report,
             )
         except Exception as err:
-            raise err
             raise ReportResult.error(str(err))

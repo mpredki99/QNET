@@ -8,10 +8,10 @@ from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import AdjustmentParams
 from ..infrastructure import get_method_name_and_tuning_constants
-from .base_view_model import BaseViewModel
+from .base_view_model import BaseViewModelSection
 
 
-class WeightingMethodsViewModel(BaseViewModel):
+class WeightingMethodsViewModel(BaseViewModelSection):
     """
     ViewModel for managing weighting methods and tuning constants for both
     observation and free adjustment phases in the adjustment process.
