@@ -12,17 +12,17 @@ from qgis.PyQt.QtWidgets import QAction
 
 from .icons.icons import main_icon
 from .models.main_model import MainModel
-from .view_models import MainViewModel
-from .views import MainView
+from .view_models.main_view_model import MainViewModel
+from .views.main_view import MainView
 
 
 class QNet:
     """
-    QGIS plugin for integrated surveying network adjustment.
+    Main class for QNET QGIS plugin.
 
-    Provides a graphical user interface for surveying network adjustment workflows,
-    including file import, adjustment computation, exporting of reports and
-    control points geometry.
+    Handles integration with the QGIS interface, including adding and removing
+    plugin actions to the toolbar and initializing main dialog logic.
+    Orchestrates plugin lifecycle methods required by the QGIS plugin infrastructure.
     """
 
     def __init__(self, iface: Optional["QgisInterface"]) -> None:

@@ -9,7 +9,7 @@ from functools import partial
 from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import OutputParams
-from .base_view_model import BaseViewModelSection
+from .base_view_models import BaseViewModelSection
 
 
 class OutputViewModel(BaseViewModelSection):

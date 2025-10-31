@@ -8,7 +8,7 @@ from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import AdjustmentParams
 from ..infrastructure import get_method_name_and_tuning_constants
-from .base_view_model import BaseViewModelSection
+from .base_view_models import BaseViewModelSection
 
 
 class WeightingMethodsViewModel(BaseViewModelSection):

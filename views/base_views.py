@@ -6,7 +6,7 @@
 
 from typing import Generic, Optional, TypeVar
 
-from ..view_models.base_view_model import BaseViewModel
+from ..view_models.base_view_models import BaseViewModel
 
 ViewModelType = TypeVar("ViewModelType", bound=BaseViewModel)
 

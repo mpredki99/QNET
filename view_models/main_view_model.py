@@ -14,7 +14,7 @@ from qgis.PyQt.QtCore import pyqtSignal
 from ..dto.data_transfer_objects import OutputParams
 from ..models.main_model import MainModel
 from ..models.results.result import Result, ResultStatus
-from .base_view_model import BaseViewModel
+from .base_view_models import BaseViewModel
 from .input_files_view_model import InputFilesViewModel
 from .output_view_model import OutputViewModel
 from .report_view_model import ReportViewModel

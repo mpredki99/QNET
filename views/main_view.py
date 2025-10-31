@@ -6,7 +6,7 @@
 
 from typing import Optional
 
-from ..view_models import MainViewModel
+from ..view_models.main_view_model import MainViewModel
 from .base_views import BaseView
 from .components.widgets import (
     QNetErrorMessageBox,

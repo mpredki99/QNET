@@ -5,18 +5,14 @@
 # Full text of the license can be found in the LICENSE file in the repository.
 
 """
-Module for UI components definition for the QNET plugin.
-Provides layouts and widgets for file selection, weighting method configuration,
-and output options.
+-------------------------------------- Components -------------------------------------
+
+This module contains reusable user interface (UI) components for the QNET QGIS plugin. 
+It serves as a toolbox for specialized widgets, layouts, and utility functions.
+
+- widgets: custom Qt widgets subclasses that implement plugin specific logic.
+- layouts: predefined layout classes for arranging widgets across plugin views.
+- utils: functions for open file dialogs or updating widgets state.
+
+---------------------------------------------------------------------------------------
 """
-
-from .layouts import FileLayout, WeightingMethodLayout
-from .widgets import QDoubleSpinBoxList, SavingModeMenu, WeightingMethodComboBox
-
-__all__ = [
-    "FileLayout",
-    "WeightingMethodLayout",
-    "QDoubleSpinBoxList",
-    "WeightingMethodComboBox",
-    "SavingModeMenu",
-]
