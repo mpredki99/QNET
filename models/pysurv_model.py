@@ -39,6 +39,7 @@ class PySurvModel:
             project = ps.Project.from_csv(
                 input_files_params.measurements_file_path,
                 input_files_params.controls_file_path,
+                swap_xy=True,
             )
             self._project = project
             return ImportResult.success(
