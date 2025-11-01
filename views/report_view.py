@@ -42,7 +42,7 @@ class ReportView(ReportViewUI, BaseViewSection[ReportViewModel]):
     def bind_view_model_signals(self) -> None:
         """Bind view model signals to UI update methods."""
         self.view_model.export_report_changed.connect(self.enable_report)
-        self.view_model.repot_path_changed.connect(self.update_report_line_edit)
+        self.view_model.report_path_changed.connect(self.update_report_line_edit)
 
     def enable_report(self, enabled: bool) -> None:
         """Enable or disable report control widgets."""

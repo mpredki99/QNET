@@ -170,7 +170,7 @@ class QNetErrorMessageBox(QNetMessageBox):
         super().__init__(title, text, icon=qnet_error_pixmap, parent=parent)
 
 
-class QNetWarinigMessageBox(QNetMessageBox):
+class QNetWarningMessageBox(QNetMessageBox):
     """Warning message box with custom QNET warning icon."""
 
     def __init__(self, title: str, text: str, parent: Optional[QWidget] = None) -> None:

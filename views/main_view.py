@@ -11,7 +11,7 @@ from .base_views import BaseView
 from .components.widgets import (
     QNetErrorMessageBox,
     QNetInformationMessageBox,
-    QNetWarinigMessageBox,
+    QNetWarningMessageBox,
 )
 from .main_view_ui import MainViewUI
 
@@ -45,9 +45,9 @@ class MainView(MainViewUI, BaseView):
 
     def bind_view_model_signals(self) -> None:
         """Bind view model signals to UI update methods."""
-        self.view_model.error_occured.connect(self.show_error_message)
-        self.view_model.warining_occured.connect(self.show_warning_message)
-        self.view_model.success_occured.connect(self.show_info_message)
+        self.view_model.error_occurred.connect(self.show_error_message)
+        self.view_model.warning_occurred.connect(self.show_warning_message)
+        self.view_model.success_occurred.connect(self.show_info_message)
 
     def perform_adjustment(self) -> None:
         """Perform the adjustment."""
@@ -59,7 +59,7 @@ class MainView(MainViewUI, BaseView):
 
     def show_warning_message(self, warning_type: str, warning_message: str) -> None:
         """Show an warning message box for the user."""
-        QNetWarinigMessageBox(warning_type, warning_message, parent=self)
+        QNetWarningMessageBox(warning_type, warning_message, parent=self)
 
     def show_info_message(self, info_type: str, info_message: str) -> None:
         """Show an warning message box for the user."""

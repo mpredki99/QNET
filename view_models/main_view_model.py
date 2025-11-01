@@ -32,9 +32,9 @@ class MainViewModel(BaseViewModel):
     and provides the data and logic backbone for the main dialog.
     """
 
-    error_occured = pyqtSignal(str, str)
-    warining_occured = pyqtSignal(str, str)
-    success_occured = pyqtSignal(str, str)
+    error_occurred = pyqtSignal(str, str)
+    warning_occurred = pyqtSignal(str, str)
+    success_occurred = pyqtSignal(str, str)
 
     def __init__(
         self,
@@ -115,9 +115,9 @@ class MainViewModel(BaseViewModel):
             return
 
         signals = {
-            ResultStatus.SUCCESS: self.success_occured,
-            ResultStatus.WARNING: self.warining_occured,
-            ResultStatus.ERROR: self.error_occured,
+            ResultStatus.SUCCESS: self.success_occurred,
+            ResultStatus.WARNING: self.warning_occurred,
+            ResultStatus.ERROR: self.error_occurred,
         }
         signal = signals.get(result.status)
         signal.emit(result.title, result.message)

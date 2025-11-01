@@ -21,7 +21,7 @@ class ReportViewModel(BaseViewModelSection):
     """
 
     export_report_changed = pyqtSignal(bool)
-    repot_path_changed = pyqtSignal(str)
+    report_path_changed = pyqtSignal(str)
 
     missing_report_path = pyqtSignal()
 
@@ -52,4 +52,4 @@ class ReportViewModel(BaseViewModelSection):
 
     def _emit_report_path_changed(self) -> None:
         """Emit report_path_changed signal."""
-        self.repot_path_changed.emit(self.params.report_path)
+        self.report_path_changed.emit(self.params.report_path)
