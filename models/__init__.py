@@ -5,25 +5,31 @@
 # Full text of the license can be found in the LICENSE file in the repository.
 
 """
-------------------------------------- Model layer -------------------------------------
+=================================== Model Layer ========================================
+
+This package contains the Model layer for the QNET QGIS plugin, implementing the
+business logic and core computational operations.
 
 This module contains logic models for the QNET QGIS plugin, organizing the business logic 
 and core computational operations that support the ViewModel and View layers. The Model 
 layer is structured into two submodels, each responsible for a specific aspect of the 
-plugin's internal state and processing pipeline.
+plugin's processing pipeline.
 
-Structure:
+Structure
+---------
+- main_model.py: Central gateway, aggregates and coordinates sub-models
+- pysurv_model.py: Wraps the pysurv library functionality (import data, least squares adjustment, generate report)
+- qgis_model.py: Contains QGIS-specific workflow logic, exports adjusted coordinates to QGIS layers
+
+Inheritance Relations
+---------------------
+All model classes are standalone dataclasses with no inheritance hierarchy.
+They follow a composition pattern where `MainModel` aggregates `PySurvModel`
+and `QgisModel` as component objects.
+
+Submodules
 ----------
-- `MainModel`: The central gateway for all model operations, aggregating the sub-models.
-- `PySurvModel`: Wraps the logic of the pysurv package, covering all data import, 
-  computation, and report-generation.
-- `QgisModel`: Contains logic for QGIS-specific workflows, such as exporting adjusted 
-  geometries to layers or files.
+- results/: Defines Result objects returned by model methods
 
-Submodules:
------------
-- `results`: Defines Result objects which are returned by model methods to represent the 
-  outcome of computations and operations.
-
----------------------------------------------------------------------------------------
+========================================================================================
 """

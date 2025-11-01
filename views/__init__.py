@@ -5,23 +5,52 @@
 # Full text of the license can be found in the LICENSE file in the repository.
 
 """
-------------------------------- View Layer --------------------------------------------
+==================================== View Layer ========================================
 
-This package contains all view components for the QNET QGIS plugin. These modules are 
-responsible for rendering the user interface and connecting UI events to their 
-corresponding view models.
+This package contains all view components for the QNET QGIS plugin. These modules
+are responsible for rendering the user interface, displaying data and connecting 
+UI events and capturing user input to their corresponding ViewModels.
 
-Inheritance Structure:
-----------------------:
-- `BaseViewUI` and `BaseViewSectionUI`: Abstract classes that provide foundational UI building logic.
-- `BaseView` and `BaseViewSection`: Classes that encapsulate shared logic for ViewModel binding.
-- UI classes: Define widget arrangements and static UI elements.
-- View classes: Inherit from their respective `*UI` base classes and manage widget and ViewModel 
-  signal connections.
+Structure
+---------
+- base_views_ui.py: Defines abstract base classes for building dialog layouts
+- base_views.py: Defines generic base class for ViewModel binding functionality
+- main_view_ui.py: Defines main dialog widget layout, arranges section views
+- main_view.py: Combines UI layout with ViewModel binding, coordinates all section views
 
-Submodules:
------------
-- `components`: Collection of reusable UI components, widgets, layouts and utility functions.
+Section Views: 
+- *_view_ui.py: Define widget arrangements and static UI elements
+- *_view.py: Manage widgets and ViewModel signal connections
 
----------------------------------------------------------------------------------------
+Inheritance Relations
+--------------------
+UI Hierarchy:
+
+QDialog (Qt base class)
+└── BaseViewUI (abstract)
+    ├── BaseViewSectionUI (abstract)
+    │   ├── InputFilesViewUI
+    │   ├── WeightingMethodsViewUI
+    │   ├── OutputViewUI
+    │   └── ReportViewUI
+    └── MainViewUI
+
+ViewModel Binding Hierarchy:
+
+BaseView[ViewModelType] (generic, abstract)
+├── BaseViewSection[ViewModelType] (generic, abstract)
+│   ├── InputFilesView
+│   ├── WeightingMethodsView
+│   ├── OutputView
+│   └── ReportView
+└── MainView
+
+In the View layer, each View class uses multiple inheritance to combine its corresponding
+UI layout class with the relevant generic BaseView class for ViewModel binding.
+
+Submodules
+----------
+- components/: Collection of reusable UI components
+
+========================================================================================
 """
