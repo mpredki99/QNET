@@ -23,7 +23,7 @@ class PySurvModel:
     def __init__(self) -> None:
         self._project = None
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.project is not None
 
     @property

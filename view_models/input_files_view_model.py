@@ -21,9 +21,8 @@ class InputFilesViewModel(BaseViewModelSection):
     measurements_file_path_changed = pyqtSignal(str)
     controls_file_path_changed = pyqtSignal(str)
 
-    def __init__(self, model=None) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.model = model
 
         self.params = InputFilesParams()
 

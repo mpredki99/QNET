@@ -11,13 +11,13 @@ from .result import Result
 
 class AdjustmentResult(Result):
     @classmethod
-    def success(cls, message: str, output: Optional[Any] = None):
+    def success(cls, message: str, output: Optional[Any] = None) -> "AdjustmentResult":
         return super().success("Adjustment Complete", message, output=output)
 
     @classmethod
-    def warning(cls, message: str, output: Optional[Any] = None):
+    def warning(cls, message: str, output: Optional[Any] = None) -> "AdjustmentResult":
         return super().warning("Adjustment Warning", message, output=output)
 
     @classmethod
-    def error(cls, message: str, output: Optional[Any] = None):
+    def error(cls, message: str, output: Optional[Any] = None) -> "AdjustmentResult":
         return super().error("Adjustment Error", message, output=output)

@@ -2,7 +2,7 @@
 # Copyright (C) 2025 Michał Prędki
 # Licensed under the GNU General Public License v3.0.
 
-from typing import Any, Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 from qgis.PyQt.QtCore import pyqtSignal
 
@@ -27,9 +27,8 @@ class WeightingMethodsViewModel(BaseViewModelSection):
     free_adjustment_weighting_method_changed = pyqtSignal(str)
     free_adjustment_tuning_constants_changed = pyqtSignal(tuple)
 
-    def __init__(self, model: Optional[Any] = None) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.model = model
         self.params = AdjustmentParams()
 
     def reset_state(self) -> None:

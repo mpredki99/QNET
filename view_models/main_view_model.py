@@ -6,7 +6,7 @@
 
 from functools import partial
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable
 
 from pysurv import Project
 from qgis.PyQt.QtCore import pyqtSignal
@@ -38,7 +38,7 @@ class MainViewModel(BaseViewModel):
 
     def __init__(
         self,
-        model: Optional[MainModel] = None,
+        model: MainModel,
         input_files_view_model=InputFilesViewModel(),
         weighting_methods_view_model=WeightingMethodsViewModel(),
         report_view_model=ReportViewModel(),

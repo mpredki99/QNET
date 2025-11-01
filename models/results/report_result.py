@@ -11,13 +11,13 @@ from .result import Result
 
 class ReportResult(Result):
     @classmethod
-    def success(cls, message: str, output: Optional[Any] = None):
+    def success(cls, message: str, output: Optional[Any] = None) -> "ReportResult":
         return super().success("Report Exported", message, output=output)
 
     @classmethod
-    def warning(cls, message: str, output: Optional[Any] = None):
+    def warning(cls, message: str, output: Optional[Any] = None) -> "ReportResult":
         return super().warning("Report Warning", message, output=output)
 
     @classmethod
-    def error(cls, message: str, output: Optional[Any] = None):
+    def error(cls, message: str, output: Optional[Any] = None) -> "ReportResult":
         return super().error("Report Error", message, output=output)

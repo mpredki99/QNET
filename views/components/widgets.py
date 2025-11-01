@@ -4,10 +4,8 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-from typing import Any, Optional, Tuple
+from typing import Any, Iterator, Optional, Tuple
 
-from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtWidgets import QDoubleSpinBox
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import (
@@ -54,7 +52,7 @@ class QDoubleSpinBoxList(QObject):
         """Return the number of spin boxes contained."""
         return len(self._items)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[QDoubleSpinBox]:
         """Return iterator over spin boxes."""
         return iter(self._items)
 
@@ -85,7 +83,7 @@ class QDoubleSpinBoxList(QObject):
     def _handle_list_method(self, name: str) -> Any:
         """Handle list method delegation."""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             return getattr(self._items, name)(*args, **kwargs)
 
         attr = getattr(list, name)
@@ -94,7 +92,7 @@ class QDoubleSpinBoxList(QObject):
     def _handle_spin_box_method(self, name: str) -> Any:
         """Handle QDoubleSpinBox method delegation."""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             return [getattr(sb, name)(*args, **kwargs) for sb in self._items]
 
         attr = getattr(QDoubleSpinBox, name)
@@ -120,7 +118,7 @@ class WeightingMethodComboBox(QComboBox):
         self.addItems(weighting_methods)
 
     @property
-    def currentTextChanged(self):
+    def currentTextChanged(self) -> pyqtSignal:
         """Provides the currentTextChanged signal, handling compatibility for both PyQt5 and PyQt6."""
         try:
             return super().currentTextChanged

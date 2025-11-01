@@ -4,7 +4,6 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -12,6 +11,7 @@ import pandas as pd
 import pysurv as ps
 from qgis.core import (
     QgsCoordinateTransformContext,
+    QgsDataProvider,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -36,15 +36,15 @@ class QGisModel:
         self._data_provider = None
 
     @property
-    def points_data(self):
+    def points_data(self) -> Optional[pd.DataFrame]:
         return self._points_data
 
     @property
-    def layer(self):
+    def layer(self) -> Optional[QgsVectorLayer]:
         return self._layer
 
     @property
-    def data_provider(self):
+    def data_provider(self) -> Optional[QgsDataProvider]:
         return self._data_provider
 
     @property
@@ -159,7 +159,7 @@ class QGisModel:
         self.layer.updateExtents()
 
     @staticmethod
-    def get_field_dtype(column):
+    def get_field_dtype(column: pd.Series) -> QVariant:
         dtype = column.dtype
         if pd.api.types.is_integer_dtype(dtype):
             return QVariant.Int

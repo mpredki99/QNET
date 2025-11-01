@@ -25,9 +25,8 @@ class ReportViewModel(BaseViewModelSection):
 
     missing_report_path = pyqtSignal()
 
-    def __init__(self, model=None) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.model = model
 
         self.params = ReportParams()
 

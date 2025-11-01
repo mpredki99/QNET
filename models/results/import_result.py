@@ -11,13 +11,13 @@ from .result import Result
 
 class ImportResult(Result):
     @classmethod
-    def success(cls, message: str, output: Optional[Any] = None):
+    def success(cls, message: str, output: Optional[Any] = None) -> "ImportResult":
         return super().success("Import Files Complete", message, output=output)
 
     @classmethod
-    def warning(cls, message: str, output: Optional[Any] = None):
+    def warning(cls, message: str, output: Optional[Any] = None) -> "ImportResult":
         return super().warning("Import Files Warning", message, output=output)
 
     @classmethod
-    def error(cls, message: str, output: Optional[Any] = None):
+    def error(cls, message: str, output: Optional[Any] = None) -> "ImportResult":
         return super().error("Import Files Error", message, output=output)

@@ -6,7 +6,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Generator, Optional
 
 
 class ResultStatus(Enum):
@@ -34,7 +34,7 @@ class Result:
         self.message = message
         self.output = output
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Any, None, None]:
         """Enables unpacking the object: status, title, message, output = Result()."""
         yield self.status
         yield self.title
@@ -42,13 +42,13 @@ class Result:
         yield self.output
 
     @classmethod
-    def success(cls, title: str, message: str, output: Optional[Any] = None):
+    def success(cls, title: str, message: str, output: Optional[Any] = None) -> "Result":
         return cls(ResultStatus.SUCCESS, title, message, output=output)
 
     @classmethod
-    def warning(cls, title: str, message: str, output: Optional[Any] = None):
+    def warning(cls, title: str, message: str, output: Optional[Any] = None) -> "Result":
         return cls(ResultStatus.WARNING, title, message, output=output)
 
     @classmethod
-    def error(cls, title: str, message: str, output: Optional[Any] = None):
+    def error(cls, title: str, message: str, output: Optional[Any] = None) -> "Result":
         return cls(ResultStatus.ERROR, title, message, output=output)

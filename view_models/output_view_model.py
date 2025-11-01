@@ -26,10 +26,8 @@ class OutputViewModel(BaseViewModelSection):
     output_saving_mode_changed = pyqtSignal(str)
     output_path_changed = pyqtSignal(str)
 
-    def __init__(self, model=None) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.model = model
-
         self.params = OutputParams()
 
     def reset_state(self) -> None:
