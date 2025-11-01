@@ -16,7 +16,7 @@ from .components.widgets import (
 from .main_view_ui import MainViewUI
 
 
-class MainView(MainViewUI, BaseView):
+class MainView(MainViewUI, BaseView[MainViewModel]):
     """
     Main dialog logic for the QNET plugin.
 
@@ -27,10 +27,7 @@ class MainView(MainViewUI, BaseView):
     def __init__(self, main_view_model: Optional[MainViewModel] = None) -> None:
         super().__init__()
 
-        self.view_model = main_view_model
-
-        if not self.view_model:
-            return
+        self.view_model = main_view_model or MainViewModel()
 
         self.input_file_view.view_model = self.view_model.input_files_view_model
         self.weighting_methods_view.view_model = (

@@ -17,11 +17,14 @@ def get_file_path_from_dialog_window(
     mode: Literal["open", "save"],
 ) -> str:
     """Open file dialog and return selected file path."""
-    modes = {
+    window_modes = {
         "open": QFileDialog.getOpenFileName,
         "save": QFileDialog.getSaveFileName,
     }
-    window_mode = modes.get(mode)
+    window_mode = window_modes.get(mode)
+
+    if not window_mode:
+        return ""
 
     path, _ = window_mode(widget, window_title, dir, file_filter)
     return path if path else ""

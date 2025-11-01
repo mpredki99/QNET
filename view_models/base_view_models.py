@@ -8,18 +8,20 @@ from qgis.PyQt.QtCore import QObject
 
 
 class BaseViewModel(QObject):
+    """Base class for QNET ViewModels."""
 
-    def __init__(self, model=None) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
 
 class BaseViewModelSection(BaseViewModel):
+    """Base class for section ViewModels in the QNET plugin."""
 
-    def __init__(self, model=None) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
     def reset_state(self) -> None:
         """Reset the params state and emit signals."""
         raise NotImplementedError(
-            f"{self.__class__.__name__} must implement bind_widgets()"
+            f"{self.__class__.__name__} must implement reset_state()"
         )

@@ -37,13 +37,13 @@ class BaseView(Generic[ViewModelType]):
         self.bind_widgets()
         self.bind_view_model_signals()
 
-    def bind_widgets(self):
+    def bind_widgets(self) -> None:
         """Bind UI widgets to their respective handlers."""
         raise NotImplementedError(
             f"{self.__class__.__name__} must implement bind_widgets()"
         )
 
-    def bind_view_model_signals(self):
+    def bind_view_model_signals(self) -> None:
         """Bind view model signals to UI update methods."""
         raise NotImplementedError(
             f"{self.__class__.__name__} must implement bind_view_model_signals()"

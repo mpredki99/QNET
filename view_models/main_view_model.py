@@ -6,13 +6,15 @@
 
 from functools import partial
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 from pysurv import Project
 from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import OutputParams
 from ..models.main_model import MainModel
+from ..models.pysurv_model import PySurvModel
+from ..models.qgis_model import QGisModel
 from ..models.results.result import Result, ResultStatus
 from .base_view_models import BaseViewModel
 from .input_files_view_model import InputFilesViewModel
@@ -38,45 +40,59 @@ class MainViewModel(BaseViewModel):
 
     def __init__(
         self,
-        model: MainModel,
-        input_files_view_model=InputFilesViewModel(),
-        weighting_methods_view_model=WeightingMethodsViewModel(),
-        report_view_model=ReportViewModel(),
-        output_view_model=OutputViewModel(),
+        model: Optional[MainModel] = None,
+        input_files_view_model: Optional[InputFilesViewModel] = None,
+        weighting_methods_view_model: Optional[WeightingMethodsViewModel] = None,
+        report_view_model: Optional[ReportViewModel] = None,
+        output_view_model: Optional[OutputViewModel] = None,
     ) -> None:
         super().__init__()
 
-        self.pysurv_model = model.pysurv_model
-        self.qgis_model = model.qgis_model
+        self.pysurv_model = model.pysurv_model if model else PySurvModel()
+        self.qgis_model = model.qgis_model if model else QGisModel()
 
-        self.input_files_view_model = input_files_view_model
-        self.weighting_methods_view_model = weighting_methods_view_model
-        self.report_view_model = report_view_model
-        self.output_view_model = output_view_model
+        self.input_files_view_model = input_files_view_model or InputFilesViewModel()
+        self.weighting_methods_view_model = (
+            weighting_methods_view_model or WeightingMethodsViewModel()
+        )
+        self.report_view_model = report_view_model or ReportViewModel()
+        self.output_view_model = output_view_model or OutputViewModel()
 
     def perform_adjustment(self) -> None:
         """Perform the network adjustment and export results."""
         if not self._run_pysurv_workflow():
             return  # Break if pysurv workflow failed
         self._run_qgis_workflow()
-        
+
     def _run_pysurv_workflow(self) -> bool:
-        return Workflow(
-            partial(self.pysurv_model.create_project, self.input_files_view_model.params),
-            partial(self._emit_result_signal, emit_success=False),
-        ).add_step(
+        return (
             Workflow(
-                partial(self.pysurv_model.adjust, self.weighting_methods_view_model.params),
+                partial(
+                    self.pysurv_model.create_project, self.input_files_view_model.params
+                ),
                 partial(self._emit_result_signal, emit_success=False),
             )
-        ).add_step(
-            Workflow(
-                partial(self.pysurv_model.export_report, self.report_view_model.params),
-                partial(self._emit_result_signal, emit_success=True),
-                skip=not self.report_view_model.params.export_report,
-                prepare_func=self._prepare_report_path,
+            .add_step(
+                Workflow(
+                    partial(
+                        self.pysurv_model.adjust,
+                        self.weighting_methods_view_model.params,
+                    ),
+                    partial(self._emit_result_signal, emit_success=False),
+                )
             )
-        ).run()
+            .add_step(
+                Workflow(
+                    partial(
+                        self.pysurv_model.export_report, self.report_view_model.params
+                    ),
+                    partial(self._emit_result_signal, emit_success=True),
+                    skip=not self.report_view_model.params.export_report,
+                    prepare_func=self._prepare_report_path,
+                )
+            )
+            .run()
+        )
 
     def _run_qgis_workflow(self) -> bool:
         return Workflow(
@@ -101,7 +117,9 @@ class MainViewModel(BaseViewModel):
             str(controls_file_dir.joinpath("report.txt"))
         )
 
-    def _handle_output_saving_mode(self) -> Callable[[Project, OutputParams], Result]:
+    def _handle_output_saving_mode(
+        self,
+    ) -> Optional[Callable[[Project, OutputParams], Result]]:
         """Return output handler method based on the selected output saving mode."""
         output_methods = {
             "Temporary layer": self.qgis_model.create_output_layer,

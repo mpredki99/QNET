@@ -4,20 +4,12 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-from typing import Any, Optional
-
 from .result import Result
 
 
 class OutputResult(Result):
-    @classmethod
-    def success(cls, message: str, output: Optional[Any] = None) -> "OutputResult":
-        return super().success("Output Created", message, output=output)
+    """Result class for output creation operations."""
 
-    @classmethod
-    def warning(cls, message: str, output: Optional[Any] = None) -> "OutputResult":
-        return super().warning("Output Warning", message, output=output)
-
-    @classmethod
-    def error(cls, message: str, output: Optional[Any] = None) -> "OutputResult":
-        return super().error("Output Error", message, output=output)
+    _success_title = "Output Created"
+    _warning_title = "Output Warning"
+    _error_title = "Output Error"

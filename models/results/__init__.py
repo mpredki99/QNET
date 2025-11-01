@@ -13,4 +13,3 @@ and any relevant return data for seamless communication between core logic, View
 
 ---------------------------------------------------------------------------------------
 """
-

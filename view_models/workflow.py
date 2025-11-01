@@ -24,7 +24,7 @@ class Workflow:
     model_func: Callable[[], Result]
     signal_emitor: Callable[[Result], None]
     skip: bool = False
-    prepare_func: Optional[Callable] = None
+    prepare_func: Optional[Callable[[], None]] = None
 
     steps: List["Workflow"] = field(default_factory=list, init=False)
 

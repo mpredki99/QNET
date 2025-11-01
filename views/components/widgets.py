@@ -4,7 +4,7 @@
 # Licensed under the GNU General Public License v3.0.
 # Full text of the license can be found in the LICENSE file in the repository.
 
-from typing import Any, Iterator, Optional, Tuple
+from typing import Any, Iterator, List, Optional, Tuple
 
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 from qgis.PyQt.QtGui import QPixmap
@@ -21,10 +21,9 @@ from ...icons.icons import (
     main_pixmap,
     qnet_error_pixmap,
     qnet_information_pixmap,
-    qnet_question_pixmap,
     qnet_warning_pixmap,
 )
-from ...infrastructure.weighting_methods import WEIGHTING_METHODS
+from ...utils.weighting_methods import WEIGHTING_METHODS
 
 
 class QDoubleSpinBoxList(QObject):
@@ -106,14 +105,16 @@ class WeightingMethodComboBox(QComboBox):
     """
 
     def __init__(
-        self, weighting_methods: Optional[list] = None, parent: Optional[QWidget] = None
+        self,
+        weighting_methods: Optional[List[str]] = None,
+        parent: Optional[QWidget] = None,
     ) -> None:
         super().__init__(parent)
         self._populate(
             weighting_methods or [method for method in WEIGHTING_METHODS.keys()]
         )
 
-    def _populate(self, weighting_methods: list) -> None:
+    def _populate(self, weighting_methods: List[str]) -> None:
         """Populate widget with supported weighting methods."""
         self.addItems(weighting_methods)
 

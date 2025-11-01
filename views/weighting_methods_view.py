@@ -7,7 +7,7 @@
 from itertools import zip_longest
 from typing import Optional, Tuple
 
-from ..infrastructure import get_method_label_from_name
+from ..utils.weighting_methods import get_method_label_from_name
 from ..view_models.weighting_methods_view_model import WeightingMethodsViewModel
 from .base_views import BaseViewSection
 from .components.utils import update_checkbox_state, update_combo_box_text

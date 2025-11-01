@@ -9,6 +9,7 @@ from typing import Optional
 
 import pandas as pd
 import pysurv as ps
+from pysurv.data import Controls
 from qgis.core import (
     QgsCoordinateTransformContext,
     QgsDataProvider,
@@ -31,12 +32,12 @@ from .results.result import Result
 
 class QGisModel:
     def __init__(self) -> None:
-        self._points_data = None
-        self._layer = None
-        self._data_provider = None
+        self._points_data: Optional[Controls] = None
+        self._layer: Optional[QgsVectorLayer] = None
+        self._data_provider: Optional[QgsDataProvider] = None
 
     @property
-    def points_data(self) -> Optional[pd.DataFrame]:
+    def points_data(self) -> Optional[Controls]:
         return self._points_data
 
     @property

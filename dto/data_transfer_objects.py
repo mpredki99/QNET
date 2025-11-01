@@ -7,8 +7,6 @@
 from dataclasses import dataclass
 from typing import Literal, Optional
 
-saving_modes = Literal["Temporary layer", "To file"]
-
 
 @dataclass
 class InputFilesParams:
@@ -41,5 +39,5 @@ class ReportParams:
 class OutputParams:
     """Gather parameters for output saving."""
 
-    output_saving_mode: saving_modes = "Temporary layer"
+    output_saving_mode: Literal["Temporary layer", "To file"] = "Temporary layer"
     output_path: str = ""

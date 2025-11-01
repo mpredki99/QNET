@@ -9,7 +9,11 @@ from pathlib import Path
 from typing import Optional
 
 import pysurv as ps
-from pysurv.exceptions import *
+from pysurv.exceptions import (
+    EmptyDatasetError,
+    InvalidDataError,
+    MissingMandatoryColumnsError,
+)
 from pysurv.warnings import PySurvWarning
 
 from ..dto.data_transfer_objects import AdjustmentParams, InputFilesParams, ReportParams
@@ -21,7 +25,7 @@ from .results.result import Result
 
 class PySurvModel:
     def __init__(self) -> None:
-        self._project = None
+        self._project: Optional[ps.Project] = None
 
     def __bool__(self) -> bool:
         return self.project is not None
@@ -91,12 +95,15 @@ class PySurvModel:
                 return AdjustmentResult.error(str(err), output=self.project)
 
             if warns:
-                return AdjustmentResult.warning(message=str(warns[-1].message))
+                return AdjustmentResult.warning(
+                    message=str(warns[-1].message), output=self.project.adjustment
+                )
+
             return AdjustmentResult.success(
                 "Adjustment converged successfully.", output=self.project.adjustment
             )
 
-    def export_report(self, report_params: ReportParams) -> None:
+    def export_report(self, report_params: ReportParams) -> Result:
         """Export adjustment report file."""
         try:
             self.project.adjustment.report.to_txt(report_params.report_path)
@@ -105,4 +112,4 @@ class PySurvModel:
                 output=self.project.adjustment.report,
             )
         except Exception as err:
-            raise ReportResult.error(str(err))
+            return ReportResult.error(str(err))

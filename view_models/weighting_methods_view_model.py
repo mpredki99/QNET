@@ -2,12 +2,12 @@
 # Copyright (C) 2025 Michał Prędki
 # Licensed under the GNU General Public License v3.0.
 
-from typing import Callable, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import AdjustmentParams
-from ..infrastructure import get_method_name_and_tuning_constants
+from ..utils.weighting_methods import get_method_name_and_tuning_constants
 from .base_view_models import BaseViewModelSection
 
 
@@ -90,8 +90,8 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         method_label: str,
         weighting_method_param: str,
         tuning_constants_param: str,
-        emit_method_changed: callable,
-        emit_tuning_constants_changed: callable,
+        emit_method_changed: Callable[[], None],
+        emit_tuning_constants_changed: Callable[[], None],
     ) -> None:
         """Update the weighting method and its tuning constants."""
         method_name, tuning_constants = get_method_name_and_tuning_constants(
@@ -108,7 +108,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         self,
         tuning_constants_param: str,
         tuning_constants_values: Tuple[float],
-        emit_tuning_constants_changed: Callable,
+        emit_tuning_constants_changed: Callable[[], None],
     ) -> None:
         """Update the values of tuning constants."""
         tuning_constants = getattr(self.params, tuning_constants_param)
@@ -139,7 +139,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         )
 
     def _emit_weighting_method_changed(
-        self, signal: Callable, method_name: str
+        self, signal: Callable[[str], None], method_name: str
     ) -> None:
         """Emit weighting method changed signal."""
         signal.emit(method_name)
@@ -159,7 +159,9 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         )
 
     def _emit_tuning_constants_changed(
-        self, signal: Callable, tuning_constants: Optional[dict]
+        self,
+        signal: Callable[[Tuple[float, ...]], None],
+        tuning_constants: Optional[Dict[str, float]],
     ) -> None:
         """Emit tuning constants changed signal."""
         signal.emit(
