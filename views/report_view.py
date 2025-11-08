@@ -22,9 +22,9 @@ class ReportView(ReportViewUI, BaseViewSection[ReportViewModel]):
     """
     View class for the export report section in the QNET plugin.
 
-    This class connects the Report UI with its corresponding `ReportViewModel`, 
-    implementing two-way data binding between user interaction logic enabling report 
-    generation and managing file path. The class binds UI widget events to ViewModel 
+    This class connects the Report UI with its corresponding `ReportViewModel`,
+    implementing two-way data binding between user interaction logic enabling report
+    generation and managing file path. The class binds UI widget events to ViewModel
     handlers and updates the interface in response to ViewModel signals.
 
     Attributes

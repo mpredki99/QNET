@@ -16,7 +16,7 @@ class InputFilesViewUI(BaseViewSectionUI):
     """
     UI base class for the Input Files section in the QNET plugin.
 
-    This class defines and arranges the widgets used for selecting the input data 
+    This class defines and arranges the widgets used for selecting the input data
     files required for network adjustment computations.
 
     Attributes

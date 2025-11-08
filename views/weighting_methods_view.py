@@ -21,13 +21,12 @@ class WeightingMethodsView(
     """
     View class for the Weighting Methods section in the QNET plugin.
 
-    This class connects the Weighting Methods UI with its corresponding 
+    This class connects the Weighting Methods UI with its corresponding
     `WeightingMethodsViewModel`, enabling two-way data binding between user interactions
     and application state. It manages the selection of observation and free adjustment
     weighting methods, the activation of the free adjustment mode, and the configuration
-    of their tuning constants.The class binds UI widget events to ViewModel handlers and 
+    of their tuning constants.The class binds UI widget events to ViewModel handlers and
     updates the interface in response to ViewModel signals.
-
 
     Attributes
     ----------
@@ -87,7 +86,9 @@ class WeightingMethodsView(
             self.observation_weighting_method_combo_box, method_name
         )
 
-    def update_free_adjustment_weighting_method_combo_box(self, method_name: str) -> None:
+    def update_free_adjustment_weighting_method_combo_box(
+        self, method_name: str
+    ) -> None:
         """Update free adjustment weighting method combo box current text."""
         self._update_weighting_method_combo_box_text(
             self.free_adjustment_weighting_method_combo_box, method_name

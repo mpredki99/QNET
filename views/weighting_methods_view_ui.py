@@ -15,8 +15,8 @@ class WeightingMethodsViewUI(BaseViewSectionUI):
     """
     UI base class for the Weighting Methods section in the QNET plugin.
 
-    This class defines and arranges the widgets used for configuring observation and 
-    free adjustment weighting methods. It provides controls for method selection, 
+    This class defines and arranges the widgets used for configuring observation and
+    free adjustment weighting methods. It provides controls for method selection,
     optional free adjustment enablement, and tuning constant values configuration.
 
     Attributes

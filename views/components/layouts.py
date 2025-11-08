@@ -38,7 +38,7 @@ class FileLayout(QFormLayout):
     ) -> None:
         """
         Initialize FileLayout object.
-        
+
         Parameters
         ----------
         - label : QLabel, optional
@@ -93,7 +93,7 @@ class WeightingMethodLayout(QFormLayout):
     ) -> None:
         """
         Initialize WeightingMethodLayout.
-        
+
         Parameters
         ----------
         - label : QLabel, optional

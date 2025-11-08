@@ -15,8 +15,8 @@ class ReportViewUI(BaseViewSectionUI):
     UI base class for the Report export section in the QNET plugin.
 
     This class defines and organizes the user interface elements related to report
-    generation. It provides widgets for enabling or disabling report creation, 
-    specifying the output report file path, and browsing for a destination file. 
+    generation. It provides widgets for enabling or disabling report creation,
+    specifying the output report file path, and browsing for a destination file.
 
     Attributes
     ----------
@@ -29,7 +29,6 @@ class ReportViewUI(BaseViewSectionUI):
     - report_button : QPushButton
         Button opening a file dialog for selecting the report file location.
     """
-
 
     def __init__(self) -> None:
         """Initialize all widgets used for the export report section View."""

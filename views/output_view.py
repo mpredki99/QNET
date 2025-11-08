@@ -16,12 +16,12 @@ from .output_view_ui import OutputViewUI
 class OutputView(OutputViewUI, BaseViewSection[OutputViewModel]):
     """
     View class for the QGIS output section in the QNET plugin.
-    
+
     This class connects the Output View UI with its corresponding `OutputViewModel`,
     enabling two-way data binding between user interactions and application state.
-    It manages the logic for saving the output file allowing users to choose between 
+    It manages the logic for saving the output file allowing users to choose between
     saving results to a file or a temporary QGIS layer. It connects the UI widget
-    events to ViewModel handlers with the corresponding and updates the interface 
+    events to ViewModel handlers with the corresponding and updates the interface
     in response to ViewModel signals.
 
     Attributes

@@ -19,7 +19,7 @@ class InputFilesView(InputFilesViewUI, BaseViewSection[InputFilesViewModel]):
     This class connects the Input Files UI with its corresponding `InputFilesViewModel`,
     enabling two-way data binding between user interactions and application state.
     It manages the logic for selecting and displaying the paths of the input files.
-    The class binds UI widget events to ViewModel handlers and updates the interface 
+    The class binds UI widget events to ViewModel handlers and updates the interface
     in response to ViewModel signals.
 
     Attributes

@@ -104,6 +104,7 @@ class QDoubleSpinBoxList(QObject):
 
     def _handle_list_method(self, name: str) -> Any:
         """Handle list method delegation."""
+
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             return getattr(self._items, name)(*args, **kwargs)
 
@@ -112,6 +113,7 @@ class QDoubleSpinBoxList(QObject):
 
     def _handle_spin_box_method(self, name: str) -> Any:
         """Handle QDoubleSpinBox method delegation."""
+
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             return [getattr(sb, name)(*args, **kwargs) for sb in self._items]
 
@@ -126,7 +128,7 @@ class WeightingMethodComboBox(QComboBox):
     Automatically populates itself with supported methods defined in
     `WEIGHTING_METHODS`. Supports compatibility with both PyQt5 and PyQt6
     signal naming conventions.
-    
+
     Signals
     -------
     - currentTextChanged: str
@@ -171,7 +173,7 @@ class SavingModeMenu(QMenu):
     """
     QMenu for selecting the output saving mode.
 
-    Displays actions for QGIS layer available output modes, such as saving to 
+    Displays actions for QGIS layer available output modes, such as saving to
     a temporary QGIS layer or exporting results to a file.
     """
 
@@ -202,7 +204,6 @@ class QNetMessageBox(QMessageBox):
     such as error, warning, and information dialogs.
     """
 
-
     def __init__(
         self,
         title: str,
@@ -212,7 +213,7 @@ class QNetMessageBox(QMessageBox):
     ) -> None:
         """
         Initialize QNetMessageBox and display it immediately.
-        
+
         Parameters
         ----------
         - title : str

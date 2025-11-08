@@ -16,7 +16,7 @@ class OutputViewUI(BaseViewSectionUI):
     UI base class for the Output section in the QNET plugin.
 
     This class defines and arranges the widgets used for selecting the output file
-    location and configuring how results are saved. It provides a labeled input field 
+    location and configuring how results are saved. It provides a labeled input field
     for specifying the output path, a menu-enabled button for choosing saving modes.
 
     Attributes
@@ -50,9 +50,8 @@ class OutputViewUI(BaseViewSectionUI):
             line_edit=self.output_line_edit,
             button=self.output_button,
         )
-        
+
     def _configure_widgets(self) -> None:
         """Configure widgets for output file section"""
         self.output_line_edit.setPlaceholderText("[Temporary layer]")
         self.output_button.setMenu(self.output_saving_mode_menu)
-        

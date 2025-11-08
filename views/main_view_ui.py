@@ -17,11 +17,11 @@ class MainViewUI(BaseViewUI):
     """
     Main dialog UI for the QNET plugin.
 
-    Serves as the top-level user interface container that assembles all major sections 
-    of the QNET plugin, including input file selection, weighting method configuration, 
+    Serves as the top-level user interface container that assembles all major sections
+    of the QNET plugin, including input file selection, weighting method configuration,
     report settings, and output management. This class is responsible for initializing
     and arranging all section views in a dialog layout.
-    
+
     Attributes
     ----------
     - input_file_view : InputFilesView
@@ -41,7 +41,7 @@ class MainViewUI(BaseViewUI):
         super().__init__()
         self.setWindowTitle("QNET")
         self.resize(430, 285)
-        
+
         self.input_file_view = InputFilesView()
         self.weighting_methods_view = WeightingMethodsView()
         self.report_view = ReportView()

@@ -21,8 +21,8 @@ class MainView(MainViewUI, BaseView[MainViewModel]):
     Main dialog logic for the QNET plugin.
 
     Integrates the top-level user interface of the QNET plugin with its corresponding
-    `MainViewModel`, orchestrating all sub-views and managing user interactions. This 
-    class acts as the central coordinator for input handling, execution of the network 
+    `MainViewModel`, orchestrating all sub-views and managing user interactions. This
+    class acts as the central coordinator for input handling, execution of the network
     adjustment process, and displaying the messages.
 
     Attributes
@@ -40,7 +40,6 @@ class MainView(MainViewUI, BaseView[MainViewModel]):
     - ok_button : QPushButton
         Main action button used to execute the adjustment process.
     """
-
 
     def __init__(self, main_view_model: Optional[MainViewModel] = None) -> None:
         """
