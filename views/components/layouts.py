@@ -21,8 +21,11 @@ from .widgets import QDoubleSpinBoxList
 
 class FileLayout(QFormLayout):
     """
-    A form layout for file I/O. Optionally includes a label,
-    checkbox, line edit, and button.
+    Standardized form layout for file input and output widgets.
+
+    Provides a flexible layout for combining common file selection controls
+    such as a label, optional enable/disable checkbox, line edit for path display,
+    and a button for browsing or saving files.
     """
 
     def __init__(
@@ -33,8 +36,23 @@ class FileLayout(QFormLayout):
         button: Optional[QPushButton] = None,
         parent=None,
     ) -> None:
+        """
+        Initialize FileLayout object.
+        
+        Parameters
+        ----------
+        - label : QLabel, optional
+            Descriptive label for the file input section.
+        - checkbox : QCheckBox, optional
+            Checkbox to enable or disable file-related options.
+        - line_edit : QLineEdit, optional
+            Line edit for displaying or manually entering the file path.
+        - button : QPushButton, optional
+            Button for invoking a file dialog or confirming file selection.
+        - parent : QWidget, optional
+            Parent widget for the layout.
+        """
         super().__init__(parent)
-
         self.addRow(label)
 
         row = self._build_file_row(checkbox, line_edit, button)
@@ -46,7 +64,7 @@ class FileLayout(QFormLayout):
         line_edit: Optional[QLineEdit],
         button: Optional[QPushButton],
     ) -> QHBoxLayout:
-        """Build a horizontal row for file input widgets."""
+        """Build a horizontal layout row for the checkbox, line edit, and button."""
         file_row_layout = QHBoxLayout()
         if checkbox:
             file_row_layout.addWidget(checkbox, stretch=0)
@@ -59,8 +77,11 @@ class FileLayout(QFormLayout):
 
 class WeightingMethodLayout(QFormLayout):
     """
-    A form layout for weighting method selection. Supports an optional
-    label, checkbox, combo box, and a row of tuning constant spin boxes.
+    Form layout for configuring weighting methods.
+
+    Assembles widgets related to weighting method selection, including an
+    optional label, checkbox, combo box for choosing the method, and a row
+    of QDoubleSpinBox widgets for entering method-specific tuning constants.
     """
 
     def __init__(
@@ -70,6 +91,20 @@ class WeightingMethodLayout(QFormLayout):
         combo_box: Optional[QComboBox] = None,
         tuning_constants: Optional[QDoubleSpinBoxList] = None,
     ) -> None:
+        """
+        Initialize WeightingMethodLayout.
+        
+        Parameters
+        ----------
+        - label : QLabel, optional
+            Label describing the weighting method section.
+        - checkbox : QCheckBox, optional
+            Checkbox to enable or disable weighting method configuration.
+        - combo_box : QComboBox, optional
+            Combo box listing available weighting methods.
+        - tuning_constants : QDoubleSpinBoxList, optional
+            Container holding spin boxes for tuning constants.
+        """
         super().__init__()
 
         if label:

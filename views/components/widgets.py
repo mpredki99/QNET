@@ -28,16 +28,39 @@ from ...utils.weighting_methods import WEIGHTING_METHODS
 
 class QDoubleSpinBoxList(QObject):
     """
-    A widget containing QDoubleSpinBox widgets as a list.
-    Allows batch method calls and attribute access to all contained spin boxes.
+    Container for multiple QDoubleSpinBox widgets.
+
+    Provides a list-like interface for managing and interacting with several
+    spin boxes simultaneously. This allows batch configuration, value retrieval,
+    and unified signal handling.
+
+    Signals
+    -------
+    - listValueChanged : tuple
+        Emitted when any visible spin box value changes.
+
+    Attributes
+    ----------
+    _items : list[QDoubleSpinBox]
+        List of QDoubleSpinBox widgets contained in this widget.
     """
 
     listValueChanged = pyqtSignal(tuple)
 
     def __init__(self, n: int, parent: Optional[QWidget] = None) -> None:
+        """
+        Initialize a container of QDoubleSpinBox widgets.
+
+        Parameters
+        ----------
+        n : int
+            The number of QDoubleSpinBox widgets to create and store in the list.
+        parent : QWidget, optional
+            Parent widget for the QDoubleSpinBoxList object and its child spin boxes.
+        """
         super().__init__(parent)
-        self._items = [QDoubleSpinBox() for _ in range(n)]
-        self.bind_spin_boxes()
+        self._items = [QDoubleSpinBox(parent=parent) for _ in range(n)]
+        self._bind_spin_boxes()
 
     def __getattr__(self, name: str) -> Any:
         """Delegate attribute access or method calls to list container or QDoubleSpinBox items."""
@@ -67,12 +90,12 @@ class QDoubleSpinBoxList(QObject):
             )
         self._items[index] = value
 
-    def bind_spin_boxes(self) -> None:
+    def _bind_spin_boxes(self) -> None:
         """Bind valueChanged signal of each spin box to emit_list_value_changed."""
         for sb in self._items:
-            sb.valueChanged.connect(self.emit_list_value_changed)
+            sb.valueChanged.connect(self._emit_list_value_changed)
 
-    def emit_list_value_changed(self, _: float) -> None:
+    def _emit_list_value_changed(self, _: float) -> None:
         """Emit listValueChanged signal with current visible spin box values."""
         values = tuple(
             spin_box.value() for spin_box in self._items if spin_box.isVisible()
@@ -81,7 +104,6 @@ class QDoubleSpinBoxList(QObject):
 
     def _handle_list_method(self, name: str) -> Any:
         """Handle list method delegation."""
-
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             return getattr(self._items, name)(*args, **kwargs)
 
@@ -90,7 +112,6 @@ class QDoubleSpinBoxList(QObject):
 
     def _handle_spin_box_method(self, name: str) -> Any:
         """Handle QDoubleSpinBox method delegation."""
-
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             return [getattr(sb, name)(*args, **kwargs) for sb in self._items]
 
@@ -100,8 +121,16 @@ class QDoubleSpinBoxList(QObject):
 
 class WeightingMethodComboBox(QComboBox):
     """
-    QComboBox widget for selecting a weighting method.
-    Populates itself with available methods from WEIGHTING_METHODS.
+    QComboBox for selecting a weighting method.
+
+    Automatically populates itself with supported methods defined in
+    `WEIGHTING_METHODS`. Supports compatibility with both PyQt5 and PyQt6
+    signal naming conventions.
+    
+    Signals
+    -------
+    - currentTextChanged: str
+        Provides access to the text change signal compatible with PyQt5 and PyQt6.
     """
 
     def __init__(
@@ -109,13 +138,24 @@ class WeightingMethodComboBox(QComboBox):
         weighting_methods: Optional[List[str]] = None,
         parent: Optional[QWidget] = None,
     ) -> None:
+        """
+        Initialize the WeightingMethodComboBox.
+
+        Parameters
+        ----------
+        weighting_methods : List[str] [optional, default=None]
+            List of weighting method names to populate the combo box. If not provided,
+            all available methods from `WEIGHTING_METHODS` will be used.
+        parent : QWidget, optional
+            The parent widget.
+        """
         super().__init__(parent)
         self._populate(
             weighting_methods or [method for method in WEIGHTING_METHODS.keys()]
         )
 
     def _populate(self, weighting_methods: List[str]) -> None:
-        """Populate widget with supported weighting methods."""
+        """Populate widget with weighting method names."""
         self.addItems(weighting_methods)
 
     @property
@@ -129,12 +169,22 @@ class WeightingMethodComboBox(QComboBox):
 
 class SavingModeMenu(QMenu):
     """
-    QMenu widget for selecting the saving mode.
-    Adds actions for each available saving mode.
+    QMenu for selecting the output saving mode.
+
+    Displays actions for QGIS layer available output modes, such as saving to 
+    a temporary QGIS layer or exporting results to a file.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
+        """
+        Initialize the SavingModeMenu.
+
+        Parameters
+        ----------
+        parent : QWidget, optional
+            The parent widget.
+        """
+        super().__init__(parent)
         for action in self._define_output_mode_actions():
             self.addAction(action)
 
@@ -145,9 +195,13 @@ class SavingModeMenu(QMenu):
 
 class QNetMessageBox(QMessageBox):
     """
-    Base message box for QNET plugin dialogs.
-    Handles title, text and custom pixmap icon.
+    Base message box class for QNET dialogs.
+
+    Provides a standardized message box layout with QNET-specific icons
+    and titles. Serves as a common base for specialized message box types
+    such as error, warning, and information dialogs.
     """
+
 
     def __init__(
         self,
@@ -156,6 +210,20 @@ class QNetMessageBox(QMessageBox):
         icon: QPixmap = main_pixmap,
         parent: Optional[QWidget] = None,
     ) -> None:
+        """
+        Initialize QNetMessageBox and display it immediately.
+        
+        Parameters
+        ----------
+        - title : str
+            Window title displayed in the dialog.
+        - text : str
+            Main message text to display.
+        - icon : QPixmap, default=main_pixmap
+            Custom pixmap used as the dialog icon.
+        - parent : QWidget, optional
+            Parent widget of the message box.
+        """
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setText(text)

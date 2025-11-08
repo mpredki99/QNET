@@ -13,19 +13,43 @@ from .components.widgets import QDoubleSpinBoxList, WeightingMethodComboBox
 
 class WeightingMethodsViewUI(BaseViewSectionUI):
     """
-    UI base for the weighting methods section in the QNET plugin.
+    UI base class for the Weighting Methods section in the QNET plugin.
 
-    Assembles and configures widgets for selecting observation and free adjustment
-    weighting methods, including their tuning constants and enabling/disabling
-    free adjustment options.
+    This class defines and arranges the widgets used for configuring observation and 
+    free adjustment weighting methods. It provides controls for method selection, 
+    optional free adjustment enablement, and tuning constant values configuration.
+
+    Attributes
+    ----------
+    - TUNING_CONSTANTS_DECIMALS : int
+        Number of decimal places displayed in the tuning constant spin boxes.
+    - TUNING_CONSTANTS_RANGE : tuple[float, float]
+        Minimum and maximum values allowed for tuning constants.
+    - TUNING_CONSTANTS_STEP : float
+        Step size used when adjusting tuning constant values.
+    - observation_weighting_method_label : QLabel
+        Label for the observation weighting method selection.
+    - observation_weighting_method_combo_box : WeightingMethodComboBox
+        Drop-down list for selecting the observation weighting method.
+    - observation_weighting_method_tuning_constants : QDoubleSpinBoxList
+        List of spin boxes for defining observation weighting method tuning constant values.
+    - free_adjustment_weighting_method_label : QLabel
+        Label for the free adjustment weighting method section.
+    - free_adjustment_checkbox : QCheckBox
+        Checkbox enabling or disabling the free adjustment option.
+    - free_adjustment_weighting_method_combo_box : WeightingMethodComboBox
+        Drop-down list for selecting the free adjustment weighting method.
+    - free_adjustment_weighting_method_tuning_constants : QDoubleSpinBoxList
+        List of spin boxes for defining free adjustment weighting method tuning constant values.
     """
 
     # Layout constants
-    tuning_constants_decimals = 3
-    tuning_constants_range = (0.0, 100.0)
-    tuning_constants_step = 0.01
+    TUNING_CONSTANTS_DECIMALS = 3
+    TUNING_CONSTANTS_RANGE = (0.0, 100.0)
+    TUNING_CONSTANTS_STEP = 0.01
 
     def __init__(self) -> None:
+        """Initialize all widgets used for the section View."""
         super().__init__()
         self.observation_weighting_method_label = QLabel(
             "Observations weighting methods:"
@@ -45,7 +69,7 @@ class WeightingMethodsViewUI(BaseViewSectionUI):
         self.setLayout(layout)
 
     def build_layout(self) -> QHBoxLayout:
-        """Build and return the weighting methods layout."""
+        """Build and return the layout for the weighting methods section."""
         observation_weighting_methods_layout = WeightingMethodLayout(
             label=self.observation_weighting_method_label,
             combo_box=self.observation_weighting_method_combo_box,
@@ -58,10 +82,10 @@ class WeightingMethodsViewUI(BaseViewSectionUI):
             tuning_constants=self.free_adjustment_weighting_method_tuning_constants,
         )
 
-        main_layout = QHBoxLayout()
-        main_layout.addLayout(observation_weighting_methods_layout, stretch=1)
-        main_layout.addLayout(free_adjustment_weighting_methods_layout, stretch=1)
-        return main_layout
+        layout = QHBoxLayout()
+        layout.addLayout(observation_weighting_methods_layout, stretch=1)
+        layout.addLayout(free_adjustment_weighting_methods_layout, stretch=1)
+        return layout
 
     def _configure_widgets(self) -> None:
         """Configure widgets for weighting methods section."""
@@ -73,7 +97,7 @@ class WeightingMethodsViewUI(BaseViewSectionUI):
 
     def _configure_tuning_constants(self, tuning_constants: QDoubleSpinBoxList) -> None:
         """Configure properties for tuning constant spin boxes."""
-        tuning_constants.setDecimals(self.tuning_constants_decimals)
-        tuning_constants.setRange(*self.tuning_constants_range)
-        tuning_constants.setSingleStep(self.tuning_constants_step)
+        tuning_constants.setDecimals(self.TUNING_CONSTANTS_DECIMALS)
+        tuning_constants.setRange(*self.TUNING_CONSTANTS_RANGE)
+        tuning_constants.setSingleStep(self.TUNING_CONSTANTS_STEP)
         tuning_constants.hide()

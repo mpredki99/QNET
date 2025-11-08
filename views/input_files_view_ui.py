@@ -14,13 +14,29 @@ from .components.layouts import FileLayout
 
 class InputFilesViewUI(BaseViewSectionUI):
     """
-    UI base for the input files section in the QNET plugin.
+    UI base class for the Input Files section in the QNET plugin.
 
-    Assembles and configures widgets for selecting measurements and controls input files.
-    Provides layouts for file selection fields and buttons.
+    This class defines and arranges the widgets used for selecting the input data 
+    files required for network adjustment computations.
+
+    Attributes
+    ----------
+    - measurements_label : QLabel
+        Label for the measurements file selection field.
+    - measurements_line_edit : QLineEdit
+        Text input field for the path to the measurements file.
+    - measurements_button : QPushButton
+        Button opening a file dialog for selecting the measurements file.
+    - controls_label : QLabel
+        Label for the controls file selection field.
+    - controls_line_edit : QLineEdit
+        Text input field for the path to the controls file.
+    - controls_button : QPushButton
+        Button opening a file dialog for selecting the controls file.
     """
 
     def __init__(self) -> None:
+        """Initialize all widgets used for the input files section View."""
         super().__init__()
         self.measurements_label = QLabel("Select measurements.csv file:")
         self.measurements_line_edit = QLineEdit()
@@ -34,11 +50,11 @@ class InputFilesViewUI(BaseViewSectionUI):
         self.setLayout(layout)
 
     def build_layout(self) -> QVBoxLayout:
-        """Build and return the layout for the input files view."""
-        main_layout = QVBoxLayout()
+        """Build and return the main layout containing all section widgets."""
+        layout = QVBoxLayout()
         for input_file_layout in self._build_input_file_layouts():
-            main_layout.addLayout(input_file_layout)
-        return main_layout
+            layout.addLayout(input_file_layout)
+        return layout
 
     def _build_input_file_layouts(self) -> Iterator[FileLayout]:
         """Yield layouts for input file selection."""

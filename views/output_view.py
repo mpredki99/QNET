@@ -9,27 +9,43 @@ from typing import Optional
 
 from ..view_models.output_view_model import OutputViewModel
 from .base_views import BaseViewSection
-from .components.utils import get_file_path_from_dialog_window, update_line_edit
+from .components.utils import get_file_path_from_dialog, update_line_edit
 from .output_view_ui import OutputViewUI
 
 
 class OutputView(OutputViewUI, BaseViewSection[OutputViewModel]):
     """
-    Output section logic and UI for the QNET plugin.
+    View class for the QGIS output section in the QNET plugin.
+    
+    This class connects the Output View UI with its corresponding `OutputViewModel`,
+    enabling two-way data binding between user interactions and application state.
+    It manages the logic for saving the output file allowing users to choose between 
+    saving results to a file or a temporary QGIS layer. It connects the UI widget
+    events to ViewModel handlers with the corresponding and updates the interface 
+    in response to ViewModel signals.
 
-    Handles interactions for selecting and saving output files, including output path selection and
-    saving mode management. Binds UI widgets to the associated view model and synchronizes states
-    and parameters for output saving.
+    Attributes
+    ----------
+    - FILE_FILTER : str
+        File type filter used in the output file dialog.
     """
 
-    file_filter = "Shapefile (*.shp)"
+    FILE_FILTER = "Shapefile (*.shp)"
 
     def __init__(self, view_model: Optional[OutputViewModel] = None) -> None:
+        """
+        Initialize the OutputView.
+
+        Parameters
+        ----------
+        - view_model : OutputViewModel, optional
+            Reference to the associated OutputViewModel.
+        """
         super().__init__()
         self.view_model = view_model
 
     def bind_widgets(self) -> None:
-        """Bind UI widgets to their handlers."""
+        """Bind UI widget signals to their ViewModel handlers."""
         for action in self.output_saving_mode_menu.actions():
             action.triggered.connect(
                 partial(self.view_model.update_output_saving_mode, action.text())
@@ -38,30 +54,30 @@ class OutputView(OutputViewUI, BaseViewSection[OutputViewModel]):
         self.output_line_edit.textChanged.connect(self.view_model.update_output_path)
 
     def bind_view_model_signals(self) -> None:
-        """Bind view model signals to UI update methods."""
+        """Bind ViewModel signals to UI update methods."""
         self.view_model.output_saving_mode_changed.connect(
             self.handle_output_saving_mode
         )
         self.view_model.output_path_changed.connect(self.update_output_line_edit)
 
     def handle_output_saving_mode(self, output_saving_mode: str) -> None:
-        """Handle change in output saving mode."""
+        """Determines and run the appropriate method when the saving mode changes."""
         output_handlers = {
             "Temporary layer": partial(self.update_output_line_edit, ""),
-            "To file": self.set_output_path_from_dialog,
+            "To file": self.update_output_line_edit_from_dialog,
         }
         output_handler = output_handlers.get(output_saving_mode)
         if output_handler:
             output_handler()
 
     def update_output_line_edit(self, output_path: str) -> None:
-        """Update the output line edit widget."""
+        """Update the output line edit with a new output file path."""
         update_line_edit(self.output_line_edit, output_path)
 
-    def set_output_path_from_dialog(self) -> None:
-        """Open file dialog and set the output path."""
-        path = get_file_path_from_dialog_window(
-            self, self.output_label.text()[:-1], "", self.file_filter, "save"
+    def update_output_line_edit_from_dialog(self) -> None:
+        """Open file dialog and return the selected path."""
+        path = get_file_path_from_dialog(
+            self, self.output_label.text()[:-1], "", self.FILE_FILTER, "save"
         )
 
         if path:

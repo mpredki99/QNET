@@ -12,13 +12,27 @@ from .components.layouts import FileLayout
 
 class ReportViewUI(BaseViewSectionUI):
     """
-    UI base for the report section in the QNET plugin.
+    UI base class for the Report export section in the QNET plugin.
 
-    Assembles and configures widgets for selecting report options, such as enabling/disabling
-    report generation, specifying the report file name or path, and browsing for a file location.
+    This class defines and organizes the user interface elements related to report
+    generation. It provides widgets for enabling or disabling report creation, 
+    specifying the output report file path, and browsing for a destination file. 
+
+    Attributes
+    ----------
+    - report_label : QLabel
+        Label for export report section.
+    - report_checkbox : QCheckBox
+        Checkbox enabling or disabling report generation.
+    - report_line_edit : QLineEdit
+        Text input field for specifying the report file path.
+    - report_button : QPushButton
+        Button opening a file dialog for selecting the report file location.
     """
 
+
     def __init__(self) -> None:
+        """Initialize all widgets used for the export report section View."""
         super().__init__()
         self.report_label = QLabel("Report:")
         self.report_checkbox = QCheckBox()
@@ -29,7 +43,7 @@ class ReportViewUI(BaseViewSectionUI):
         self.setLayout(layout)
 
     def build_layout(self) -> FileLayout:
-        """Build and return report file layout."""
+        """Build and return main layout containing all section widgets."""
         return FileLayout(
             label=self.report_label,
             checkbox=self.report_checkbox,

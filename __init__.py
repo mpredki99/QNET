@@ -57,7 +57,7 @@ View Layer (views/):
 import sys
 from pathlib import Path
 
-"""Extend sys.path with bundled vendor libraries."""
+# Extend sys.path with bundled vendor libraries
 plugin_dir = Path(__file__).parent
 lib_dir = str(plugin_dir.joinpath("lib"))
 

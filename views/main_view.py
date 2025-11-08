@@ -20,11 +20,37 @@ class MainView(MainViewUI, BaseView[MainViewModel]):
     """
     Main dialog logic for the QNET plugin.
 
-    Handles user interactions, file selection, weighting method configuration,
-    report and output options, and binds UI events to logic.
+    Integrates the top-level user interface of the QNET plugin with its corresponding
+    `MainViewModel`, orchestrating all sub-views and managing user interactions. This 
+    class acts as the central coordinator for input handling, execution of the network 
+    adjustment process, and displaying the messages.
+
+    Attributes
+    ----------
+    - view_model : MainViewModel
+        The main view model coordinating the data flow and logic across all view sections.
+    - input_file_view : InputFilesView
+        Sub-view handling measurement and control input file selection.
+    - weighting_methods_view : WeightingMethodsView
+        Sub-view managing observation and free adjustment weighting methods configurations.
+    - report_view : ReportView
+        Sub-view managing report generation and export settings.
+    - output_view : OutputView
+        Sub-view handling QGIS layer output path selection and saving mode options.
+    - ok_button : QPushButton
+        Main action button used to execute the adjustment process.
     """
 
+
     def __init__(self, main_view_model: Optional[MainViewModel] = None) -> None:
+        """
+        Initialize the MainView.
+
+        Parameters
+        ----------
+        - view_model : MainViewModel, optional
+            Reference to the associated MainViewModel.
+        """
         super().__init__()
 
         self.view_model = main_view_model or MainViewModel()
@@ -37,27 +63,27 @@ class MainView(MainViewUI, BaseView[MainViewModel]):
         self.output_view.view_model = self.view_model.output_view_model
 
     def bind_widgets(self) -> None:
-        """Bind widget signals to their respective handlers."""
+        """Bind UI widget signals to their ViewModel handlers."""
         self.ok_button.clicked.connect(self.perform_adjustment)
 
     def bind_view_model_signals(self) -> None:
-        """Bind view model signals to UI update methods."""
+        """Bind ViewModel signals to UI update methods."""
         self.view_model.error_occurred.connect(self.show_error_message)
         self.view_model.warning_occurred.connect(self.show_warning_message)
         self.view_model.success_occurred.connect(self.show_info_message)
 
     def perform_adjustment(self) -> None:
-        """Perform the adjustment."""
+        """Execute the network adjustment calcualtions."""
         self.view_model.perform_adjustment()
 
     def show_error_message(self, error_type: str, error_message: str) -> None:
-        """Show an error message box for the user."""
+        """Display an error message box for the user."""
         QNetErrorMessageBox(error_type, error_message, parent=self)
 
     def show_warning_message(self, warning_type: str, warning_message: str) -> None:
-        """Show an warning message box for the user."""
+        """Display an warning message box for the user."""
         QNetWarningMessageBox(warning_type, warning_message, parent=self)
 
     def show_info_message(self, info_type: str, info_message: str) -> None:
-        """Show an warning message box for the user."""
+        """Display an warning message box for the user."""
         QNetInformationMessageBox(info_type, info_message, parent=self)
