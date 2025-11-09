@@ -26,12 +26,38 @@ from .workflow import Workflow
 
 class MainViewModel(BaseViewModel):
     """
-    Main view model for the QNET plugin.
+    Main ViewModel serving as the central orchestrator for all QNET workflows.
 
-    Coordinates and manages the interaction between all view models corresponding to UI sections,
-    such as input files, weighting methods, report options, and output options. Acts as the
-    central point for invoking processes like adjustment calculation and output/export tasks,
-    and provides the data and logic backbone for the main dialog.
+    This class serves as the central coordinator, managing the communication between
+    the plugin's View and Model layers. It organizes and integrates all sub-ViewModels
+    for tasks such as input file selection, weighting method configuration, report file
+    exportation, and creating of QGIS output layer. It manages and executes the full
+    network adjustment process and QGIS Vector Point layer creation by invoking proper
+    models.
+
+    Signals
+    -------
+    - error_occurred : pyqtSignal(str, str)
+        Emitted when an error occurs during any step of the workflow.
+    - warning_occurred : pyqtSignal(str, str)
+        Emitted when a non-fatal issue in the workflow.
+    success_occurred : pyqtSignal(str, str)
+        Emitted when a model process completes successfully.
+
+    Attributes
+    ----------
+    - input_files_view_model : InputFilesViewModel
+        Manages state and signals related to input files selection.
+    - weighting_methods_view_model : WeightingMethodsViewModel
+        Handles configuration of weighting methods and tuning constants.
+    - report_view_model : ReportViewModel
+        Manages report export parameters.
+    - output_view_model : OutputViewModel
+        Manages QGIS layer output saving mode and file export options.
+    - pysurv_model : PySurvModel
+        Interface for performing network adjustment and report generation logic.
+    - qgis_model : QGisModel
+        Handles creation of QGIS output layer.
     """
 
     error_occurred = pyqtSignal(str, str)
@@ -46,6 +72,23 @@ class MainViewModel(BaseViewModel):
         report_view_model: Optional[ReportViewModel] = None,
         output_view_model: Optional[OutputViewModel] = None,
     ) -> None:
+        """
+        Initialize the MainViewModel and its dependencies.
+
+        Parameters
+        ----------
+        - model : MainModel, optional
+            The main model instance containing references to PySurvModel and QGisModel.
+            Instantiated if not provided.
+        - input_files_view_model : InputFilesViewModel, optional
+            ViewModel managing input file parameters. Instantiated if not provided.
+        - weighting_methods_view_model : WeightingMethodsViewModel, optional
+            ViewModel for weighting methods and tuning constants. Instantiated if not provided.
+        report_view_model : Optional[ReportViewModel], default=None
+            ViewModel for report export options. Instantiated if not provided.
+        output_view_model : Optional[OutputViewModel], default=None
+            ViewModel for QGIS output saving options. Instantiated if not provided.
+        """
         super().__init__()
 
         self.pysurv_model = model.pysurv_model if model else PySurvModel()
@@ -65,6 +108,7 @@ class MainViewModel(BaseViewModel):
         self._run_qgis_workflow()
 
     def _run_pysurv_workflow(self) -> bool:
+        """Run the PySurv workflow (project creation, adjustment calculations, report export if enabled)."""
         return (
             Workflow(
                 partial(
@@ -95,6 +139,7 @@ class MainViewModel(BaseViewModel):
         )
 
     def _run_qgis_workflow(self) -> bool:
+        """Run the QGIS workflow to generate Vector Point layer."""
         return Workflow(
             partial(
                 self._handle_output_saving_mode(),
@@ -105,7 +150,7 @@ class MainViewModel(BaseViewModel):
         ).run()
 
     def _prepare_report_path(self) -> None:
-        """Set default report path into control points directory if were not specified."""
+        """Set default report path (control points directory) if were not specified."""
         if self.report_view_model.params.report_path:
             return
 

@@ -8,16 +8,30 @@ from qgis.PyQt.QtCore import QObject
 
 
 class BaseViewModel(QObject):
-    """Base class for QNET ViewModels."""
+    """
+    Base class for all QNET ViewModels.
+
+    Provides the foundational structure for the ViewModel layer, allowing all derived
+    ViewModels to emit Qt signals for communication with their associated Views.
+    """
 
     def __init__(self) -> None:
+        """Initialize the BaseViewModel."""
         super().__init__()
 
 
 class BaseViewModelSection(BaseViewModel):
-    """Base class for section ViewModels in the QNET plugin."""
+    """
+    Abstract base class for section-level ViewModels in the QNET plugin.
+
+    Extends `BaseViewModel` to define a common interface and behavior for all
+    section-specific ViewModels. Subclasses must implement the `reset_state()`
+    method, which resets internal parameters and emits necessary update signals
+    to restore default UI values.
+    """
 
     def __init__(self) -> None:
+        """Initialize the BaseViewModelSection."""
         super().__init__()
 
     def reset_state(self) -> None:

@@ -13,11 +13,31 @@ from .base_view_models import BaseViewModelSection
 
 class WeightingMethodsViewModel(BaseViewModelSection):
     """
-    ViewModel for managing weighting methods and tuning constants for both
-    observation and free adjustment phases in the adjustment process.
+    ViewModel for managing weighting methods and tuning constants used in the adjustment.
 
-    This class provides Qt signals to notify the UI of changes and methods
-    to update the underlying adjustment parameters accordingly.
+    This class encapsulates logic related to weighting method configuration for both
+    `observation adjustment` and `free adjustment`. It tracks the selected weighting
+    methods and their associated tuning constants, updating them as needed. When a new
+    weighting method is selected, the ViewModel automatically retrieves its default
+    tuning constants from the `weighting_methods` module.
+
+    Signals
+    -------
+    - observation_weighting_method_changed : pyqtSignal(str)
+        Emitted when the observation weighting method changes.
+    - observation_tuning_constants_changed : pyqtSignal(tuple)
+        Emitted when any of the observation tuning constant values change.
+    - free_adjustment_switched : pyqtSignal(bool)
+        Emitted when free adjustment mode is toggled.
+    - free_adjustment_weighting_method_changed : pyqtSignal(str)
+        Emitted when the free adjustment weighting method changes.
+    - free_adjustment_tuning_constants_changed : pyqtSignal(tuple)
+        Emitted when any of the free adjustment tuning constant values change.
+
+    Attributes
+    ----------
+    - params : AdjustmentParams
+        Data transfer object containing current weighting and tuning configuration.
     """
 
     observation_weighting_method_changed = pyqtSignal(str)
@@ -28,11 +48,12 @@ class WeightingMethodsViewModel(BaseViewModelSection):
     free_adjustment_tuning_constants_changed = pyqtSignal(tuple)
 
     def __init__(self) -> None:
+        """Initialize the ViewModel with default adjustment parameters."""
         super().__init__()
         self.params = AdjustmentParams()
 
     def reset_state(self) -> None:
-        """Reset the adjustment parameters and emit signals."""
+        """Reset all weighting method parameters to defaults and emit signals."""
         self.params = AdjustmentParams()
         self._emit_observation_weighting_method_changed()
         self._emit_observation_tuning_constants_changed()
@@ -41,7 +62,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         self._emit_free_adjustment_tuning_constants_changed()
 
     def update_observation_weighting_method(self, method_label: str) -> None:
-        """Update the observation weighting method in adjustment params."""
+        """Update the observation weighting method and emit change signals."""
         self._update_weighting_method(
             method_label,
             "observation_weighting_method",
@@ -51,7 +72,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         )
 
     def update_free_adjustment_weighting_method(self, method_label: str) -> None:
-        """Update the free adjustment weighting method in adjustment params."""
+        """Update the free adjustment weighting method and emit change signals."""
         self._update_weighting_method(
             method_label,
             "free_adjustment_weighting_method",
@@ -63,7 +84,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
     def update_observation_tuning_constants(
         self, tuning_constant_values: Tuple[float]
     ) -> None:
-        """Update the observation tuning constants in adjustment params."""
+        """Update observation tuning constants and emit change signals."""
         self._update_tuning_constants(
             "observation_tuning_constants",
             tuning_constant_values,
@@ -73,7 +94,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
     def update_free_adjustment_tuning_constants(
         self, tuning_constant_values: Tuple[float]
     ) -> None:
-        """Update the free adjustment tuning constants in adjustment params."""
+        """Update free adjustment tuning constants and emit change signals."""
         self._update_tuning_constants(
             "free_adjustment_tuning_constants",
             tuning_constant_values,
@@ -81,7 +102,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         )
 
     def switch_free_adjustment(self, state: int) -> None:
-        """Switch the free adjustment state in adjustment params."""
+        """Toggle free adjustment mode and emit change signal."""
         self.params.perform_free_adjustment = state == 2
         self._emit_free_adjustment_switched()
 
@@ -93,7 +114,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         emit_method_changed: Callable[[], None],
         emit_tuning_constants_changed: Callable[[], None],
     ) -> None:
-        """Update the weighting method and its tuning constants."""
+        """Update weighting method and its corresponding tuning constants."""
         method_name, tuning_constants = get_method_name_and_tuning_constants(
             method_label
         )
@@ -110,7 +131,7 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         tuning_constants_values: Tuple[float],
         emit_tuning_constants_changed: Callable[[], None],
     ) -> None:
-        """Update the values of tuning constants."""
+        """Update tuning constant values."""
         tuning_constants = getattr(self.params, tuning_constants_param)
 
         if tuning_constants is None:
@@ -121,18 +142,18 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         emit_tuning_constants_changed()
 
     def _emit_free_adjustment_switched(self) -> None:
-        """Emit free_adjustment_switched signal."""
+        """Emit free adjustment switched signal."""
         self.free_adjustment_switched.emit(self.params.perform_free_adjustment)
 
     def _emit_observation_weighting_method_changed(self) -> None:
-        """Emit observation_weighting_method_changed signal."""
+        """Emit observation weighting method changed signal."""
         self._emit_weighting_method_changed(
             self.observation_weighting_method_changed,
             self.params.observation_weighting_method,
         )
 
     def _emit_free_adjustment_weighting_method_changed(self) -> None:
-        """Emit free_adjustment_weighting_method_changed signal."""
+        """Emit free adjustment weighting method changed signal."""
         self._emit_weighting_method_changed(
             self.free_adjustment_weighting_method_changed,
             self.params.free_adjustment_weighting_method,
@@ -145,14 +166,14 @@ class WeightingMethodsViewModel(BaseViewModelSection):
         signal.emit(method_name)
 
     def _emit_free_adjustment_tuning_constants_changed(self) -> None:
-        """Emit free_adjustment_tuning_constants_changed signal."""
+        """Emit free adjustment tuning constants changed signal."""
         self._emit_tuning_constants_changed(
             self.free_adjustment_tuning_constants_changed,
             self.params.free_adjustment_tuning_constants,
         )
 
     def _emit_observation_tuning_constants_changed(self) -> None:
-        """Emit observation_tuning_constants_changed signal."""
+        """Emit observation tuning constants changed signal."""
         self._emit_tuning_constants_changed(
             self.observation_tuning_constants_changed,
             self.params.observation_tuning_constants,

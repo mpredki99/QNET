@@ -12,22 +12,34 @@ from .base_view_models import BaseViewModelSection
 
 class InputFilesViewModel(BaseViewModelSection):
     """
-    ViewModel for managing input file paths and importing datasets.
+    ViewModel for managing input file paths in QNET plugin.
 
-    This class provides methods and Qt signals to update and track changes
-    to the measurements and controls file paths required for data import.
+    This class maintains references to both the `measurements` and `controls`
+    datasets.
+
+    Signals
+    -------
+    - measurements_file_path_changed : pyqtSignal(str)
+        Emitted when the measurements file path is updated.
+    - controls_file_path_changed : pyqtSignal(str)
+        Emitted when the controls file path is updated.
+
+    Attributes
+    ----------
+    - params : InputFilesParams
+        Data transfer object containing the current input file paths.
     """
 
     measurements_file_path_changed = pyqtSignal(str)
     controls_file_path_changed = pyqtSignal(str)
 
     def __init__(self) -> None:
+        """Initialize the ViewModel with default input file parameters."""
         super().__init__()
-
         self.params = InputFilesParams()
 
     def reset_state(self) -> None:
-        """Reset the input files parameters and emit signals."""
+        """Reset all input file parameters to defaults and emit signals."""
         self.params = InputFilesParams()
         self._emit_measurements_file_path_changed()
         self._emit_controls_file_path_changed()
@@ -43,9 +55,9 @@ class InputFilesViewModel(BaseViewModelSection):
         self._emit_controls_file_path_changed()
 
     def _emit_measurements_file_path_changed(self) -> None:
-        """Emit signal that the measurements file path has changed."""
+        """Emit the measurements file path changed signal."""
         self.measurements_file_path_changed.emit(self.params.measurements_file_path)
 
     def _emit_controls_file_path_changed(self) -> None:
-        """Emit signal that the controls file path has changed."""
+        """Emit the controls file path changed signal."""
         self.controls_file_path_changed.emit(self.params.controls_file_path)

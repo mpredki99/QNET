@@ -12,12 +12,25 @@ from .base_view_models import BaseViewModelSection
 
 class ReportViewModel(BaseViewModelSection):
     """
-    ViewModel for managing report export options and state in the QNET plugin.
+    ViewModel for managing report export options.
 
-    This class encapsulates the logic and state for report file export, including
-    enabling/disabling report generation, storing the report file path, and emitting
-    Qt signals when these values change. It interacts with the ExportReportCommand to
-    handle the export process and notifies the UI if a required report path is missing.
+    This class is responsible for managing the report export option (on/off) and the file path
+    where the report is saved. It also emits a signal if report export is enabled but no
+    path has been specified.
+
+    Signals
+    -------
+    - export_report_changed : pyqtSignal(bool)
+        Emitted when the report export toggle state changes.
+    - report_path_changed : pyqtSignal(str)
+        Emitted when the report file path changes.
+    - missing_report_path : pyqtSignal()
+        Emitted when a report export is attempted without a file path defined.
+
+    Attributes
+    ----------
+    - params : ReportParams
+        Data transfer object storing the report export options.
     """
 
     export_report_changed = pyqtSignal(bool)
@@ -26,30 +39,30 @@ class ReportViewModel(BaseViewModelSection):
     missing_report_path = pyqtSignal()
 
     def __init__(self) -> None:
+        """Initialize the ViewModel with default report parameters."""
         super().__init__()
-
         self.params = ReportParams()
 
     def reset_state(self) -> None:
-        """Reset report parameters and emit signals."""
+        """Reset all report parameters to defaults and emit signals."""
         self.params = ReportParams()
         self._emit_export_report_changed()
         self._emit_report_path_changed()
 
     def switch_report(self, state: int) -> None:
-        """Switch the export report state in report params."""
+        """Toggle report export on or off based on the given state."""
         self.params.export_report = state == 2
         self._emit_export_report_changed()
 
     def update_report_path(self, report_path: str) -> None:
-        """Update the report file path and emit changed signal."""
+        """Update the report file path and emit a change signal."""
         self.params.report_path = report_path
         self._emit_report_path_changed()
 
     def _emit_export_report_changed(self) -> None:
-        """Emit export_report_changed signal."""
+        """Emit export report changed signal."""
         self.export_report_changed.emit(self.params.export_report)
 
     def _emit_report_path_changed(self) -> None:
-        """Emit report_path_changed signal."""
+        """Emit report path changed signal."""
         self.report_path_changed.emit(self.params.report_path)
