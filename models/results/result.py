@@ -10,7 +10,18 @@ from typing import Any, ClassVar, Iterator, Optional
 
 
 class ResultStatus(Enum):
-    """Enum class for result status."""
+    """
+    Enumeration defining possible statuses for a `Result` object.
+
+    Attributes
+    ----------
+    - SUCCESS : str
+        Indicates the operation completed successfully.
+    - WARNING : str
+        Indicates the operation completed with warnings or non-critical issues.
+    - ERROR : str
+        Indicates the operation failed due to an error.
+    """
 
     SUCCESS = "success"
     WARNING = "warning"
@@ -20,10 +31,41 @@ class ResultStatus(Enum):
 @dataclass
 class Result:
     """
-    Base class for operation results in the QNET plugin.
+    Base class for returning operation results used across QNET models.
 
-    Uses the Template Method pattern where subclasses define title prefixes
-    via class attributes, and the base class implements the factory methods.
+    The `Result` class encapsulates the outcome of a model operation, including its
+    status (`ResultStatus`), human-readable title, descriptive message, and optional
+    output data. It is designed for subclassing, with specialized subclasses providing
+    default titles appropriate to specific operation types.
+
+    Attributes
+    ----------
+    - status : ResultStatus
+        The status of the operation (SUCCESS, WARNING, or ERROR).
+    - title : str
+        Short descriptive title summarizing the result context.
+    - message : str
+        Detailed message describing the operation outcome.
+    - output : Any, optional
+        Optional return value containing data produced by the operation.
+
+    Class Variables
+    ---------------
+    - _success_title : str
+        Default title for success results (to be overridden by subclasses).
+    - _warning_title : str
+        Default title for warning results (to be overridden by subclasses).
+    - _error_title : str
+        Default title for error results (to be overridden by subclasses).
+
+    Methods
+    -------
+    success(message: str, output: Any = None, title: str | None = None) -> Result
+        Create a Result object representing a successful operation.
+    warning(message: str, output: Any = None, title: str | None = None) -> Result
+        Create a Result object representing a warning state.
+    error(message: str, output: Any = None, title: str | None = None) -> Result
+        Create a Result object representing an error state.
     """
 
     status: ResultStatus
@@ -45,7 +87,7 @@ class Result:
 
     @classmethod
     def _get_title(cls, status: ResultStatus) -> str:
-        """Get the title for a given status."""
+        """Return the appropriate title based on the given status."""
         titles = {
             ResultStatus.SUCCESS: cls._success_title,
             ResultStatus.WARNING: cls._warning_title,

@@ -31,31 +31,54 @@ from .results.result import Result
 
 
 class QGisModel:
+    """
+    Model handling QGIS-specific output generation for the QNET plugin.
+
+    This class provides functionality to convert adjusted points data into QGIS layer.
+    It creates temporary vector layer or writes shapefile using the QGIS API, managing
+    geometry creation, attribute mapping, and CRS assignment.
+
+    Properties
+    ----------
+    - points_data : Optional[Controls]
+        Dataset containing adjusted control points.
+    - layer : Optional[QgsVectorLayer]
+        QGIS vector layer created during output generation.
+    - data_provider : Optional[QgsDataProvider]
+        Data provider for adding attributes and features to the layer.
+    """
+
     def __init__(self) -> None:
+        """Initialize the QGIS model with empty attribute references."""
         self._points_data: Optional[Controls] = None
         self._layer: Optional[QgsVectorLayer] = None
         self._data_provider: Optional[QgsDataProvider] = None
 
     @property
     def points_data(self) -> Optional[Controls]:
+        """Return the PySurv dataset currently used for generating QGIS layers."""
         return self._points_data
 
     @property
     def layer(self) -> Optional[QgsVectorLayer]:
+        """Return the QGIS vector layer instance."""
         return self._layer
 
     @property
     def data_provider(self) -> Optional[QgsDataProvider]:
+        """Return the data provider for the QGIS layer."""
         return self._data_provider
 
     @property
     def geometry_type(self) -> Optional[str]:
+        """Determine the geometry type based on the dataset columns."""
         if self.points_data is None:
             return
         return "PointZ" if "z" in self.points_data.columns else "Point"
 
     @property
-    def crs(self) -> Optional[str]:
+    def crs(self) -> str:
+        """Return the coordinate reference system string for the layer."""
         crs = getattr(self.points_data, "crs", None)
         epsg = crs.to_epsg() if crs else None
         return f"crs=EPSG:{epsg}" if epsg else ""
@@ -63,6 +86,24 @@ class QGisModel:
     def create_output_layer(
         self, project: ps.Project, output_params: OutputParams
     ) -> Result:
+        """
+        Create a temporary QGIS vector layer from the PySurv adjustment results.
+
+        Uses the adjusted control point data to populate a QGIS memory layer and
+        add it to the current QGIS project.
+
+        Parameters
+        ----------
+        - project : ps.Project
+            PySurv project containing adjustment results.
+        - output_params : OutputParams
+            Output parameters including optional output layer name or file path.
+
+        Returns
+        -------
+        - Result
+            OutputResult indicating layer creation status and optional QGIS point layer.
+        """
         try:
             self._points_data = project.adjustment.report.controls_information_table
             self._create_layer(
@@ -80,13 +121,31 @@ class QGisModel:
     def create_output_file(
         self, project: ps.Project, output_params: OutputParams
     ) -> Result:
+        """
+        Export adjusted data to a shapefile and add it to the QGIS project.
+
+        Writes the adjusted coordinates to disk in Shapefile format, managing file
+        cleanup and encoding options. Automatically adds the exported layer to the
+        QGIS project upon success.
+
+        Parameters
+        ----------
+        - project : ps.Project
+            PySurv project containing adjustment results.
+        - output_params : OutputParams
+            Output parameters including optional output layer name or file path.
+
+        Returns
+        -------
+        - Result
+            OutputResult indicating shapefile export status and optional QGIS point layer.
+        """
         try:
             self._points_data = project.dataset.controls
             filepath = Path(output_params.output_path)
             self._create_layer(filepath.stem)
             # Add file extension if needed
-            if not filepath.suffix == ".shp":
-                filepath = filepath.with_suffix(".shp")
+            filepath = filepath.with_suffix(".shp")
 
             # Remove existing file if needed
             for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg"]:
@@ -115,7 +174,19 @@ class QGisModel:
             return OutputResult.error(str(err))
 
     def _create_layer(self, layer_name: str) -> QgsVectorLayer:
-        """Create QGIS layer object."""
+        """
+        Create a new QGIS layer and populate it with fields and features.
+
+        Parameters
+        ----------
+        - layer_name : str
+            Name to assign to the created QGIS layer.
+
+        Returns
+        -------
+        - QgsVectorLayer
+            Created QGIS vector layer instance.
+        """
         self._layer = QgsVectorLayer(
             f"{self.geometry_type}?{self.crs}", layer_name, "memory"
         )
@@ -125,6 +196,7 @@ class QGisModel:
         self._create_layer_features()
 
     def _create_layer_fields(self) -> None:
+        """Create and add attribute fields to the QGIS layer based on dataset columns."""
         fields = QgsFields()
         # Create index field
         id_field = QgsField("id", QVariant.String)
@@ -139,6 +211,7 @@ class QGisModel:
         self.layer.updateFields()
 
     def _create_layer_features(self) -> None:
+        """Create and add point features to the QGIS layer using dataset geometry data."""
         feats = []
 
         for row in self.points_data.itertuples():
@@ -161,6 +234,7 @@ class QGisModel:
 
     @staticmethod
     def get_field_dtype(column: pd.Series) -> QVariant:
+        """Map a columns dtype to the corresponding QGIS QVariant type."""
         dtype = column.dtype
         if pd.api.types.is_integer_dtype(dtype):
             return QVariant.Int

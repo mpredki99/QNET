@@ -8,7 +8,7 @@ from .result import Result
 
 
 class OutputResult(Result):
-    """Result class for output creation operations."""
+    """Result class for QGIS layer output creation operations."""
 
     _success_title = "Output Created"
     _warning_title = "Output Warning"

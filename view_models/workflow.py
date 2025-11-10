@@ -13,12 +13,25 @@ from ..models.results.result import Result, ResultStatus
 @dataclass
 class Workflow:
     """
-    Workflow represents a step or a collection of steps in a sequence of actions to be performed,
-    typically involving model operations and emitting corresponding signals. Each Workflow instance
-    contains a function to execute (model_func), a signal emitter (signal_emitor) to notify about
-    the result, and can optionally be skipped or have a preparation function executed before the main
-    action. Workflows can be chained using add_step to form a tree of operations executed in order,
-    with each step running only if the previous did not result in an error.
+    Represents an executable step or a chain of dependent actions in the QNET plugin.
+
+    Each Workflow encapsulates a model function to execute, an associated signal
+    emitter to handle the result, and optional logic to prepare or skip the step.
+    Workflows can be chained to form sequential execution flows, with each step
+    proceeding only if the previous one completes without error.
+
+    Attributes
+    ----------
+    - model_func : Callable[[], Result]
+        The function performing the main operation for this workflow step.
+    - signal_emitor : Callable[[Result], None]
+        The callback responsible for emitting signals based on the result status.
+    - skip : bool, optional
+        If True, the step is skipped during execution. Defaults to False.
+    - prepare_func : Callable[[], None], optional
+        Function executed before model_func to prepare any required context.
+    - steps : List[Workflow]
+        List of subsequent workflow steps to be executed sequentially.
     """
 
     model_func: Callable[[], Result]
@@ -35,7 +48,7 @@ class Workflow:
 
     def run(self) -> bool:
         """Run this workflow step and all chained steps."""
-        if not self._run_self(self):
+        if not Workflow._run_self(self):
             return False
 
         if not self.steps:
