@@ -23,8 +23,6 @@ Section ViewModels:
 - report_view_model.py: Handles report file path selection
 - output_view_model.py: Handles export path selection and manages output configuration
 
-- workflow.py: Manages the execution of model methods
-
 Inheritance Relations
 ---------------------
 QObject (Qt base class)

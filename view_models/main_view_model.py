@@ -6,9 +6,10 @@
 
 from functools import partial
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 from pysurv import Project
+from qgis.core import QgsApplication
 from qgis.PyQt.QtCore import pyqtSignal
 
 from ..dto.data_transfer_objects import OutputParams
@@ -16,12 +17,12 @@ from ..models.main_model import MainModel
 from ..models.pysurv_model import PySurvModel
 from ..models.qgis_model import QGisModel
 from ..models.results.result import Result, ResultStatus
+from ..utils.tasks.qnet_background_task import QNetBackgroundTask
 from .base_view_models import BaseViewModel
 from .input_files_view_model import InputFilesViewModel
 from .output_view_model import OutputViewModel
 from .report_view_model import ReportViewModel
 from .weighting_methods_view_model import WeightingMethodsViewModel
-from .workflow import Workflow
 
 
 class MainViewModel(BaseViewModel):
@@ -41,8 +42,10 @@ class MainViewModel(BaseViewModel):
         Emitted when an error occurs during any step of the workflow.
     - warning_occurred : pyqtSignal(str, str)
         Emitted when a non-fatal issue in the workflow.
-    success_occurred : pyqtSignal(str, str)
+    - success_occurred : pyqtSignal(str, str)
         Emitted when a model process completes successfully.
+    - adjustment_in_progress : pyqtSignal()
+        Emitted if an adjustment is requested while another one is already running.
 
     Attributes
     ----------
@@ -63,6 +66,7 @@ class MainViewModel(BaseViewModel):
     error_occurred = pyqtSignal(str, str)
     warning_occurred = pyqtSignal(str, str)
     success_occurred = pyqtSignal(str, str)
+    adjustment_in_progress = pyqtSignal()
 
     def __init__(
         self,
@@ -103,51 +107,73 @@ class MainViewModel(BaseViewModel):
 
     def perform_adjustment(self) -> None:
         """Perform the network adjustment and export results."""
-        if not self._run_pysurv_workflow():
-            return  # Break if pysurv workflow failed
-        self._run_qgis_workflow()
+        pysurv_task = QNetBackgroundTask()
+        task_manager = QgsApplication.taskManager()
 
-    def _run_pysurv_workflow(self) -> bool:
-        """Run the PySurv workflow (project creation, adjustment calculations, report export if enabled)."""
-        return (
-            Workflow(
-                partial(
-                    self.pysurv_model.create_project, self.input_files_view_model.params
-                ),
-                partial(self._emit_result_signal, emit_success=False),
-            )
-            .add_step(
-                Workflow(
-                    partial(
-                        self.pysurv_model.adjust,
-                        self.weighting_methods_view_model.params,
-                    ),
-                    partial(self._emit_result_signal, emit_success=False),
-                )
-            )
-            .add_step(
-                Workflow(
-                    partial(
-                        self.pysurv_model.export_report, self.report_view_model.params
-                    ),
-                    partial(self._emit_result_signal, emit_success=True),
-                    skip=not self.report_view_model.params.export_report,
-                    prepare_func=self._prepare_report_path,
-                )
-            )
-            .run()
+        if self._adjustment_in_progress():
+            self.adjustment_in_progress.emit()
+            return  # Prevent multiple concurrent adjustments
+
+        pysurv_task.add_step(
+            partial(
+                self.pysurv_model.create_project, self.input_files_view_model.params
+            ),
+            emit_signal=False,
+        ).add_step(
+            partial(
+                self.pysurv_model.adjust,
+                self.weighting_methods_view_model.params,
+            ),
+            emit_signal=False,
+        ).add_step(
+            partial(self.pysurv_model.export_report, self.report_view_model.params),
+            skip=not self.report_view_model.params.export_report,
+            prepare_func=self._prepare_report_path,
+            emit_signal=True,
         )
 
-    def _run_qgis_workflow(self) -> bool:
-        """Run the QGIS workflow to generate Vector Point layer."""
-        return Workflow(
+        pysurv_task_results_handler = lambda: self._handle_pysurv_results(
+            pysurv_task.results()
+        )
+
+        pysurv_task.taskCompleted.connect(pysurv_task_results_handler)
+        pysurv_task.taskTerminated.connect(pysurv_task_results_handler)
+
+        task_manager.addTask(pysurv_task)
+
+    def _handle_pysurv_results(self, results: List[Result]) -> None:
+        """Emit PySurv results signals and run QGIS task if no error occured."""
+        if not self._emit_results_signals(results):
+            return
+        # Run QGIS task if no error occured
+        self._run_qgis_task()
+
+    def _run_qgis_task(self) -> bool:
+        """Run the QGIS task to generate Vector Point layer."""
+        qgis_task = QNetBackgroundTask()
+        task_manager = QgsApplication.taskManager()
+
+        if self._adjustment_in_progress():
+            self.adjustment_in_progress.emit()
+            return  # Prevent multiple concurrent adjustments
+
+        qgis_task.add_step(
             partial(
-                self._handle_output_saving_mode(),
+                self._get_output_saving_mode_handler(),
                 self.pysurv_model.project,
                 self.output_view_model.params,
             ),
-            partial(self._emit_result_signal, emit_success=False),
-        ).run()
+            emit_signal=False,
+        )
+
+        qgis_task_results_handler = lambda: self._emit_results_signals(
+            qgis_task.results()
+        )
+
+        qgis_task.taskCompleted.connect(qgis_task_results_handler)
+        qgis_task.taskTerminated.connect(qgis_task_results_handler)
+
+        task_manager.addTask(qgis_task)
 
     def _prepare_report_path(self) -> None:
         """Set default report path (control points directory) if were not specified."""
@@ -162,7 +188,7 @@ class MainViewModel(BaseViewModel):
             str(controls_file_dir.joinpath("report.txt"))
         )
 
-    def _handle_output_saving_mode(
+    def _get_output_saving_mode_handler(
         self,
     ) -> Optional[Callable[[Project, OutputParams], Result]]:
         """Return output handler method based on the selected output saving mode."""
@@ -171,12 +197,26 @@ class MainViewModel(BaseViewModel):
             "To file": self.qgis_model.create_output_file,
         }
         return output_methods.get(self.output_view_model.params.output_saving_mode)
+    
+    def _adjustment_in_progress(self) -> bool:
+        """Return True if adjustment calculations is already in progress."""
+        task_manager = QgsApplication.taskManager()
+        return any(
+            isinstance(task, QNetBackgroundTask)
+            for task in task_manager.activeTasks()
+        )
 
-    def _emit_result_signal(self, result: Result, emit_success: bool = True) -> None:
+    def _emit_results_signals(self, results: List[Result]) -> bool:
+        """Emit signals for results. Return False on error occured."""
+        for result in results:
+            self._emit_result_signal(result)
+
+            if result.status == ResultStatus.ERROR:
+                return False
+        return True
+
+    def _emit_result_signal(self, result: Result) -> None:
         """Emit signal corresponding to the result status."""
-        if result.status == ResultStatus.SUCCESS and not emit_success:
-            return
-
         signals = {
             ResultStatus.SUCCESS: self.success_occurred,
             ResultStatus.WARNING: self.warning_occurred,

@@ -9,10 +9,10 @@
 Weighting Methods Utilities
 ========================================================================================
 
-Provides helper utilities for managing robust weighting methods used in least squares
-adjustment computations within the QNET plugin.
+Module for managing robust weighting methods used in least squares adjustment 
+computations within the QNET plugin.
 
-This module serves as an interface between human-readable method labels (as displayed
+Serves as an interface between human-readable method labels (as displayed
 in the UI) and their corresponding internal identifiers and implementations from the
 `pysurv.adjustment.robust` module.
 

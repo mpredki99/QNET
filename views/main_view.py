@@ -6,6 +6,9 @@
 
 from typing import Optional
 
+from qgis.core import Qgis
+from qgis.utils import iface
+
 from ..view_models.main_view_model import MainViewModel
 from .base_views import BaseView
 from .components.widgets import (
@@ -67,22 +70,35 @@ class MainView(MainViewUI, BaseView[MainViewModel]):
 
     def bind_view_model_signals(self) -> None:
         """Bind ViewModel signals to UI update methods."""
-        self.view_model.error_occurred.connect(self.show_error_message)
-        self.view_model.warning_occurred.connect(self.show_warning_message)
-        self.view_model.success_occurred.connect(self.show_info_message)
+        self.view_model.error_occurred.connect(self.display_error_message)
+        self.view_model.warning_occurred.connect(self.display_warning_message)
+        self.view_model.success_occurred.connect(self.display_info_message)
+        self.view_model.adjustment_in_progress.connect(
+            self.display_adjustment_in_progress_message_bar
+        )
 
     def perform_adjustment(self) -> None:
         """Execute the network adjustment calcualtions."""
         self.view_model.perform_adjustment()
 
-    def show_error_message(self, error_type: str, error_message: str) -> None:
+    def display_error_message(self, error_type: str, error_message: str) -> None:
         """Display an error message box for the user."""
         QNetErrorMessageBox(error_type, error_message, parent=self)
 
-    def show_warning_message(self, warning_type: str, warning_message: str) -> None:
+    def display_warning_message(self, warning_type: str, warning_message: str) -> None:
         """Display an warning message box for the user."""
         QNetWarningMessageBox(warning_type, warning_message, parent=self)
 
-    def show_info_message(self, info_type: str, info_message: str) -> None:
-        """Display an warning message box for the user."""
+    def display_info_message(self, info_type: str, info_message: str) -> None:
+        """Display an information message box for the user."""
         QNetInformationMessageBox(info_type, info_message, parent=self)
+
+    def display_adjustment_in_progress_message_bar(self) -> None:
+        """Display an error message bar when adjustment is already in progress."""
+        iface.messageBar().pushMessage(
+            "Adjustment in progress",
+            "An adjustment operation is already in progress. "
+            "Please wait for it to complete before starting a new one.",
+            level=Qgis.Critical,
+            duration=3,
+        )
