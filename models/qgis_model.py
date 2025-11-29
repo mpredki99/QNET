@@ -141,7 +141,7 @@ class QGisModel:
             OutputResult indicating shapefile export status and optional QGIS point layer.
         """
         try:
-            self._points_data = project.dataset.controls
+            self._points_data = project.adjustment.report.controls_information_table
             filepath = Path(output_params.output_path)
             self._create_layer(filepath.stem)
             # Add file extension if needed
