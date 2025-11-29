@@ -17,14 +17,14 @@ All network adjustment calculations are performed using the open-source **[PySur
 2. Releases follow naming format: **`QNET-v<PLUGIN VERSION>`**
 3. Each release description lists the **QGIS version it was tested with**
 4. Select the release matching your QGIS installation
-5. Under **Assets**, download: **`Source Code (zip)`**
+5. Under **Assets**, download: **`QNET.zip`**
 
 ### 2) Install in QGIS
 
 1. Open **QGIS**
 2. Go to **Plugins ▸ Manage and Install Plugins...**
 3. Select **Install from ZIP** tab
-4. Choose the downloaded **`Source Code (zip)`** archive
+4. Choose the downloaded **`QNET.zip`** archive
 5. Click **Install Plugin** button
 6. Enable **QNET** from the **Installed** plugins list if needed
 
