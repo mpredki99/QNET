@@ -225,10 +225,16 @@ class QNetMessageBox(QMessageBox):
         - parent : QWidget, optional
             Parent widget of the message box.
         """
+        # Handle both PyQt5 and PyGt6
+        try:
+            ok_button = QMessageBox.StandardButton.Ok
+        except AttributeError:
+            ok_button = QMessageBox.Ok
+        
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setText(text)
-        self.setStandardButtons(QMessageBox.Ok)
+        self.setStandardButtons(ok_button)
         self.setIconPixmap(icon)
         self.exec()
 

@@ -60,8 +60,16 @@ class ReportView(ReportViewUI, BaseViewSection[ReportViewModel]):
 
     def enable_report(self, enabled: bool) -> None:
         """Enable or disable exporting the report."""
+        # Handle both PyQt5 and PyQt6
+        try: 
+            checked = Qt.CheckState.Checked
+            unchecked = Qt.CheckState.Unchecked
+        except AttributeError:
+            checked = Qt.Checked
+            unchecked = Qt.Unchecked
+        
         update_checkbox_state(
-            self.report_checkbox, Qt.Checked if enabled else Qt.Unchecked
+            self.report_checkbox, checked if enabled else unchecked
         )
         self.report_button.setEnabled(enabled)
         self.report_line_edit.setEnabled(enabled)

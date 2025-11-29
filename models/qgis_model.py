@@ -27,7 +27,7 @@ from qgis.PyQt.QtCore import QVariant
 
 from ..dto.data_transfer_objects import OutputParams
 from .results.output_result import OutputResult
-from .results.result import Result
+from .results.result import Result, ResultStatus
 
 
 class QGisModel:
@@ -141,6 +141,13 @@ class QGisModel:
             OutputResult indicating shapefile export status and optional QGIS point layer.
         """
         try:
+            # Try export temporary file if no output path provided
+            if not output_params.output_path:
+                temporary_layer_result = self.create_output_layer(project, output_params)
+                if temporary_layer_result.status != ResultStatus.ERROR:
+                    return OutputResult.error("Empty QGIS layer file path. Temporary layer created.")
+                return temporary_layer_result
+            
             self._points_data = project.adjustment.report.controls_information_table
             filepath = Path(output_params.output_path)
             self._create_layer(filepath.stem)
