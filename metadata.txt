@@ -9,6 +9,7 @@ author=Michał Prędki
 email=open.spatial.code@gmail.com
 repository=https://github.com/mpredki99/QNET
 tracker=https://github.com/mpredki99/QNET/issues
+homepage=https://github.com/mpredki99/QNET
 
 icon=icons/png/QNet.png
 about=QNET is QGIS plugin for least squares adjustment of surveying control networks. It enables adjustment with support for free adjustment and multiple weighting methods, including robust techniques that can handle outliers in the survey measurements.
